@@ -557,6 +557,35 @@
       margin-top: 5px;
     }
 
+    .profile-bio {
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.5;
+  margin-top: 10px;
+  max-width: 450px;
+}
+
+.profile-rating {
+  color: #f5f5f5;
+  font-size: 12px;
+  margin-top: 6px;
+}
+
+.profile-edit {
+  margin-left: auto;
+  border: 1px solid var(--border);
+  background: rgba(255,255,255,0.05);
+  color: white;
+  padding: 9px 12px;
+  border-radius: 9px;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.profile-edit:hover {
+  background: rgba(255,255,255,0.10);
+}
+
     .profile-stats {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
@@ -1690,21 +1719,31 @@
 
           <div>
 
-            <div
-              class="profile-name"
-              id="profileName"
-            >
-              Guest
-            </div>
+  <div
+    class="profile-name"
+    id="profileName"
+  >
+    Guest
+  </div>
 
-            <div
-              class="profile-email"
-              id="profileEmail"
-            >
-              Sign in to create your account
-            </div>
+  <div
+    class="profile-email"
+    id="profileEmail"
+  >
+    Sign in to create your account
+  </div>
 
-          </div>
+  <div
+    class="profile-rating"
+    id="profileRating"
+  ></div>
+
+  <div
+    class="profile-bio"
+    id="profileBio"
+  ></div>
+
+</div>
 
         </div>
 
@@ -2075,173 +2114,332 @@
        UPDATE PROFILE
     ===================================================== */
 
-    function updateProfile(user) {
+   async function updateProfile(user) {
 
-      const name =
-        document.getElementById('profileName');
+  const name =
+    document.getElementById('profileName');
 
-      const email =
-        document.getElementById('profileEmail');
+  const email =
+    document.getElementById('profileEmail');
 
-      const avatar =
-        document.getElementById('profileAvatar');
+  const avatar =
+    document.getElementById('profileAvatar');
 
-      const menu =
-        document.getElementById('profileMenu');
+  const menu =
+    document.getElementById('profileMenu');
 
+  const rating =
+    document.getElementById('profileRating');
 
-      if (!user) {
-
-        name.textContent = 'Guest';
-
-        email.textContent =
-          'Sign in to create your account';
-
-        avatar.textContent = '?';
+  const bio =
+    document.getElementById('profileBio');
 
 
-        menu.innerHTML = `
+  if (!user) {
 
-          <button
-            class="profile-item"
-            onclick="openAuth()"
-          >
+    name.textContent = 'Guest';
 
-            <span>
-              Sign in / Register
-            </span>
+    email.textContent =
+      'Sign in to create your account';
 
-            <span>
-              →
-            </span>
+    avatar.textContent = '?';
 
-          </button>
+    rating.textContent = '';
+
+    bio.textContent = '';
 
 
-          <button
-            class="profile-item"
-            onclick="showToast('Настройки появятся после авторизации')"
-          >
+    menu.innerHTML = `
 
-            <span>
-              Settings
-            </span>
+      <button
+        class="profile-item"
+        onclick="openAuth()"
+      >
 
-            <span>
-              →
-            </span>
+        <span>
+          Sign in / Register
+        </span>
 
-          </button>
+        <span>
+          →
+        </span>
 
-
-          <button
-            class="profile-item"
-            onclick="showToast('Чат появится после запуска аукционов')"
-          >
-
-            <span>
-              Messages
-            </span>
-
-            <span>
-              →
-            </span>
-
-          </button>
-
-        `;
-
-        return;
-
-      }
+      </button>
 
 
-      const userEmail =
-        user.email || 'ACTNSS user';
+      <button
+        class="profile-item"
+        onclick="showToast('Настройки появятся после авторизации')"
+      >
+
+        <span>
+          Settings
+        </span>
+
+        <span>
+          →
+        </span>
+
+      </button>
 
 
-      name.textContent =
-        userEmail.split('@')[0];
+      <button
+        class="profile-item"
+        onclick="showToast('Чат появится после запуска аукционов')"
+      >
+
+        <span>
+          Messages
+        </span>
+
+        <span>
+          →
+        </span>
+
+      </button>
+
+    `;
+
+    return;
+  }
 
 
-      email.textContent =
-        userEmail;
+  const userEmail =
+    user.email || 'ACTNSS user';
 
 
-      avatar.textContent =
-        userEmail
-          .charAt(0)
-          .toUpperCase();
+  let profile = null;
 
 
-      menu.innerHTML = `
-
-        <button
-          class="profile-item"
-          onclick="showToast('Профиль будет расширен после создания таблицы profiles')"
-        >
-
-          <span>
-            My profile
-          </span>
-
-          <span>
-            →
-          </span>
-
-        </button>
+  const { data, error } =
+    await supabaseClient
+      .from('profiles')
+      .select('username, avatar_url, bio, rating')
+      .eq('id', user.id)
+      .maybeSingle();
 
 
-        <button
-          class="profile-item"
-          onclick="showToast('Настройки появятся позже')"
-        >
-
-          <span>
-            Settings
-          </span>
-
-          <span>
-            →
-          </span>
-
-        </button>
+  if (!error) {
+    profile = data;
+  }
 
 
-        <button
-          class="profile-item"
-          onclick="showToast('Чат появится после запуска аукционов')"
-        >
-
-          <span>
-            Messages
-          </span>
-
-          <span>
-            →
-          </span>
-
-        </button>
+  const username =
+    profile?.username ||
+    userEmail.split('@')[0];
 
 
-        <button
-          class="profile-item"
-          onclick="logout()"
-        >
+  name.textContent =
+    username;
 
-          <span>
-            Log out
-          </span>
 
-          <span>
-            →
-          </span>
+  email.textContent =
+    userEmail;
 
-        </button>
 
-      `;
+  avatar.textContent =
+    username
+      .charAt(0)
+      .toUpperCase();
+
+
+  rating.textContent =
+    `★ ${Number(profile?.rating ?? 5).toFixed(2)}`;
+
+
+  bio.textContent =
+    profile?.bio || 'Пользователь ACTNSS';
+
+
+  menu.innerHTML = `
+
+    <button
+      class="profile-item"
+      onclick="openEditProfile()"
+    >
+
+      <span>
+        Edit profile
+      </span>
+
+      <span>
+        →
+      </span>
+
+    </button>
+
+
+    <button
+      class="profile-item"
+      onclick="showToast('Настройки появятся позже')"
+    >
+
+      <span>
+        Settings
+      </span>
+
+      <span>
+        →
+      </span>
+
+    </button>
+
+
+    <button
+      class="profile-item"
+      onclick="showToast('Чат появится после запуска аукционов')"
+    >
+
+      <span>
+        Messages
+      </span>
+
+      <span>
+        →
+      </span>
+
+    </button>
+
+
+    <button
+      class="profile-item"
+      onclick="logout()"
+    >
+
+      <span>
+        Log out
+      </span>
+
+      <span>
+        →
+      </span>
+
+    </button>
+
+  `;
+
+}
+
+    async function openEditProfile() {
+
+  const {
+    data: {
+      session
+    }
+  } = await supabaseClient.auth.getSession();
+
+
+  if (!session) {
+
+    openAuth();
+
+    return;
+
+  }
+
+
+  const {
+    data: profile
+  } = await supabaseClient
+    .from('profiles')
+    .select('username, bio')
+    .eq('id', session.user.id)
+    .maybeSingle();
+
+
+  const username =
+    prompt(
+      'Введите username:',
+      profile?.username ||
+      session.user.email?.split('@')[0] ||
+      ''
+    );
+
+
+  if (username === null) {
+    return;
+  }
+
+
+  const cleanUsername =
+    username.trim();
+
+
+  if (!cleanUsername) {
+
+    showToast('Username не может быть пустым.');
+
+    return;
+
+  }
+
+
+  if (cleanUsername.length < 3) {
+
+    showToast(
+      'Username должен содержать минимум 3 символа.'
+    );
+
+    return;
+
+  }
+
+
+  const bio =
+    prompt(
+      'Расскажи немного о себе:',
+      profile?.bio || ''
+    );
+
+
+  if (bio === null) {
+    return;
+  }
+
+
+  const {
+    error
+  } = await supabaseClient
+    .from('profiles')
+    .update({
+      username: cleanUsername,
+      bio: bio.trim()
+    })
+    .eq('id', session.user.id);
+
+
+  if (error) {
+
+    if (
+      error.code === '23505'
+    ) {
+
+      showToast(
+        'Этот username уже занят.'
+      );
+
+    } else {
+
+      console.error(error);
+
+      showToast(
+        'Не удалось сохранить профиль.'
+      );
 
     }
+
+    return;
+
+  }
+
+
+  showToast(
+    'Профиль обновлён.'
+  );
+
+
+  updateProfile(session.user);
+}
 
 
     /* =====================================================
