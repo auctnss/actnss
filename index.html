@@ -8,6 +8,9 @@
 
   <title>ACTNSS — Auctions</title>
 
+  <!-- Supabase -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
   <style>
     * {
       box-sizing: border-box;
@@ -17,15 +20,12 @@
 
     :root {
       --bg: #09090a;
-      --bg-soft: #101011;
       --card: #131315;
       --card-hover: #18181a;
       --border: rgba(255,255,255,0.08);
       --text: #f5f5f5;
       --muted: #88888d;
       --red: #ff3030;
-      --red-dark: #9f1515;
-      --white: #ffffff;
     }
 
     html {
@@ -327,7 +327,7 @@
     }
 
     /* =========================
-       ALL LOTS
+       LOTS
     ========================= */
 
     .search-box {
@@ -601,6 +601,118 @@
     }
 
     /* =========================
+       AUTH MODAL
+    ========================= */
+
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.72);
+      backdrop-filter: blur(10px);
+      z-index: 500;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .modal-overlay.show {
+      display: flex;
+    }
+
+    .auth-modal {
+      width: min(430px, 100%);
+      background: #131315;
+      border: 1px solid rgba(255,255,255,0.10);
+      border-radius: 22px;
+      padding: 26px;
+      box-shadow: 0 30px 100px rgba(0,0,0,0.65);
+      animation: modalIn 0.22s ease;
+    }
+
+    @keyframes modalIn {
+      from {
+        opacity: 0;
+        transform: scale(0.96) translateY(10px);
+      }
+
+      to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+      }
+    }
+
+    .auth-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: start;
+      margin-bottom: 25px;
+    }
+
+    .auth-head h2 {
+      font-size: 28px;
+      letter-spacing: -1px;
+    }
+
+    .auth-head p {
+      color: var(--muted);
+      font-size: 12px;
+      margin-top: 6px;
+    }
+
+    .close-modal {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,0.04);
+      color: white;
+      font-size: 20px;
+    }
+
+    .auth-switch {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 5px;
+      background: #0c0c0e;
+      padding: 4px;
+      border-radius: 10px;
+      margin-bottom: 20px;
+    }
+
+    .auth-switch button {
+      border: none;
+      background: transparent;
+      color: var(--muted);
+      border-radius: 8px;
+      padding: 10px;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .auth-switch button.active {
+      background: white;
+      color: black;
+    }
+
+    .auth-error {
+      color: #ff5d5d;
+      font-size: 12px;
+      line-height: 1.4;
+      margin: 12px 0;
+      display: none;
+    }
+
+    .auth-error.show {
+      display: block;
+    }
+
+    .auth-loading {
+      opacity: 0.6;
+      pointer-events: none;
+    }
+
+    /* =========================
        BOTTOM NAV
     ========================= */
 
@@ -664,7 +776,6 @@
     .nav-label {
       font-size: 9px;
       font-weight: 700;
-      letter-spacing: 0.2px;
     }
 
     .create-nav {
@@ -707,7 +818,9 @@
       opacity: 0;
       pointer-events: none;
       transition: 0.25s;
-      z-index: 200;
+      z-index: 700;
+      max-width: calc(100% - 30px);
+      text-align: center;
     }
 
     .toast.show {
@@ -720,6 +833,7 @@
     ========================= */
 
     @media (max-width: 800px) {
+
       .topbar {
         padding: 0 18px;
       }
@@ -739,6 +853,7 @@
     }
 
     @media (max-width: 560px) {
+
       .topbar {
         height: 64px;
       }
@@ -821,30 +936,52 @@
 
 <body>
 
-  <!-- TOP BAR -->
+  <!-- =========================
+       TOP BAR
+  ========================= -->
+
   <header class="topbar">
-    <div class="logo">ACTNSS</div>
+
+    <div class="logo">
+      ACTNSS
+    </div>
 
     <div class="top-actions">
-      <button class="icon-btn" onclick="showToast('Уведомления появятся после подключения аккаунта')">
+
+      <button
+        class="icon-btn"
+        onclick="showToast('Уведомления появятся позже')"
+      >
         ♡
       </button>
 
-      <button class="icon-btn" onclick="showToast('Поиск будет подключён позже')">
+      <button
+        class="icon-btn"
+        onclick="showToast('Поиск будет подключён позже')"
+      >
         ⌕
       </button>
+
     </div>
+
   </header>
 
 
-  <!-- MAIN -->
+  <!-- =========================
+       MAIN
+  ========================= -->
+
   <main>
 
-    <!-- ================= HOME ================= -->
+    <!-- HOME -->
+
     <section id="home" class="page active">
 
       <div class="hero">
-        <div class="eyebrow">THE AUCTION PLATFORM</div>
+
+        <div class="eyebrow">
+          THE AUCTION PLATFORM
+        </div>
 
         <h1>
           BUY.<br>
@@ -853,90 +990,204 @@
         </h1>
 
         <p>
-          ACTNSS — место, где вещи продаются через настоящие аукционы.
-          Выбирай лот, делай ставку и побеждай.
+          ACTNSS — место, где вещи продаются через настоящие
+          аукционы. Выбирай лот, делай ставку и побеждай.
         </p>
+
       </div>
+
 
       <div class="section-head">
         <h2>Live auctions</h2>
         <span>Happening now</span>
       </div>
 
+
       <div class="auction-grid">
 
         <article class="auction-card">
+
           <div class="product-image one">
-            <div class="fake-product">01</div>
-            <div class="live-badge">LIVE</div>
-            <div class="time-badge timer" data-seconds="3420">57:00</div>
+
+            <div class="fake-product">
+              01
+            </div>
+
+            <div class="live-badge">
+              LIVE
+            </div>
+
+            <div
+              class="time-badge timer"
+              data-seconds="3420"
+            >
+              57:00
+            </div>
+
           </div>
+
 
           <div class="auction-info">
-            <div class="auction-title">Vintage Racing Jacket</div>
-            <div class="seller">@archive01</div>
+
+            <div class="auction-title">
+              Vintage Racing Jacket
+            </div>
+
+            <div class="seller">
+              @archive01
+            </div>
+
 
             <div class="price-row">
+
               <div>
-                <div class="price-label">Current bid</div>
-                <div class="price">₴2,400</div>
+
+                <div class="price-label">
+                  Current bid
+                </div>
+
+                <div class="price">
+                  ₴2,400
+                </div>
+
               </div>
 
-              <button class="bid-btn" onclick="showToast('Страница ставки скоро будет доступна')">
+
+              <button
+                class="bid-btn"
+                onclick="showToast('Настоящие ставки подключим следующим этапом')"
+              >
                 BID
               </button>
+
             </div>
+
           </div>
+
         </article>
 
 
         <article class="auction-card">
+
           <div class="product-image two">
-            <div class="fake-product">02</div>
-            <div class="live-badge">LIVE</div>
-            <div class="time-badge timer" data-seconds="5160">86:00</div>
+
+            <div class="fake-product">
+              02
+            </div>
+
+            <div class="live-badge">
+              LIVE
+            </div>
+
+            <div
+              class="time-badge timer"
+              data-seconds="5160"
+            >
+              86:00
+            </div>
+
           </div>
+
 
           <div class="auction-info">
-            <div class="auction-title">Grey Oversized Hoodie</div>
-            <div class="seller">@voidstudio</div>
+
+            <div class="auction-title">
+              Grey Oversized Hoodie
+            </div>
+
+            <div class="seller">
+              @voidstudio
+            </div>
+
 
             <div class="price-row">
+
               <div>
-                <div class="price-label">Current bid</div>
-                <div class="price">₴1,850</div>
+
+                <div class="price-label">
+                  Current bid
+                </div>
+
+                <div class="price">
+                  ₴1,850
+                </div>
+
               </div>
 
-              <button class="bid-btn" onclick="showToast('Страница ставки скоро будет доступна')">
+
+              <button
+                class="bid-btn"
+                onclick="showToast('Настоящие ставки подключим следующим этапом')"
+              >
                 BID
               </button>
+
             </div>
+
           </div>
+
         </article>
 
 
         <article class="auction-card">
+
           <div class="product-image three">
-            <div class="fake-product">03</div>
-            <div class="live-badge">LIVE</div>
-            <div class="time-badge timer" data-seconds="1890">31:30</div>
+
+            <div class="fake-product">
+              03
+            </div>
+
+            <div class="live-badge">
+              LIVE
+            </div>
+
+            <div
+              class="time-badge timer"
+              data-seconds="1890"
+            >
+              31:30
+            </div>
+
           </div>
+
 
           <div class="auction-info">
-            <div class="auction-title">Black Leather Boots</div>
-            <div class="seller">@northarchive</div>
+
+            <div class="auction-title">
+              Black Leather Boots
+            </div>
+
+            <div class="seller">
+              @northarchive
+            </div>
+
 
             <div class="price-row">
+
               <div>
-                <div class="price-label">Current bid</div>
-                <div class="price">₴3,100</div>
+
+                <div class="price-label">
+                  Current bid
+                </div>
+
+                <div class="price">
+                  ₴3,100
+                </div>
+
               </div>
 
-              <button class="bid-btn" onclick="showToast('Страница ставки скоро будет доступна')">
+
+              <button
+                class="bid-btn"
+                onclick="showToast('Настоящие ставки подключим следующим этапом')"
+              >
                 BID
               </button>
+
             </div>
+
           </div>
+
         </article>
 
       </div>
@@ -944,16 +1195,26 @@
     </section>
 
 
-    <!-- ================= LOTS ================= -->
+    <!-- LOTS -->
+
     <section id="lots" class="page">
 
       <div class="hero">
-        <div class="eyebrow">EXPLORE</div>
-        <h1>LOTS.</h1>
+
+        <div class="eyebrow">
+          EXPLORE
+        </div>
+
+        <h1>
+          LOTS.
+        </h1>
+
         <p>
           Все активные аукционы на одной странице.
         </p>
+
       </div>
+
 
       <input
         class="search-box"
@@ -962,90 +1223,209 @@
         oninput="searchLots(this.value)"
       >
 
+
       <div class="filters">
-        <button class="filter active">All</button>
-        <button class="filter">Clothing</button>
-        <button class="filter">Sneakers</button>
-        <button class="filter">Accessories</button>
-        <button class="filter">Vintage</button>
+
+        <button class="filter active">
+          All
+        </button>
+
+        <button class="filter">
+          Clothing
+        </button>
+
+        <button class="filter">
+          Sneakers
+        </button>
+
+        <button class="filter">
+          Accessories
+        </button>
+
+        <button class="filter">
+          Vintage
+        </button>
+
       </div>
 
+
       <div class="section-head">
-        <h2>Active lots</h2>
-        <span>24 auctions</span>
+
+        <h2>
+          Active lots
+        </h2>
+
+        <span>
+          24 auctions
+        </span>
+
       </div>
+
 
       <div class="auction-grid">
 
         <article class="auction-card">
+
           <div class="product-image one">
-            <div class="fake-product">04</div>
-            <div class="live-badge">LIVE</div>
+
+            <div class="fake-product">
+              04
+            </div>
+
+            <div class="live-badge">
+              LIVE
+            </div>
+
           </div>
+
 
           <div class="auction-info">
-            <div class="auction-title">Black Zip Hoodie</div>
-            <div class="seller">@unknown</div>
+
+            <div class="auction-title">
+              Black Zip Hoodie
+            </div>
+
+            <div class="seller">
+              @unknown
+            </div>
+
 
             <div class="price-row">
+
               <div>
-                <div class="price-label">Current bid</div>
-                <div class="price">₴1,200</div>
+
+                <div class="price-label">
+                  Current bid
+                </div>
+
+                <div class="price">
+                  ₴1,200
+                </div>
+
               </div>
 
-              <button class="bid-btn" onclick="showToast('Открываем лот...')">
+
+              <button
+                class="bid-btn"
+                onclick="showToast('Открываем лот...')"
+              >
                 VIEW
               </button>
+
             </div>
+
           </div>
+
         </article>
 
 
         <article class="auction-card">
+
           <div class="product-image two">
-            <div class="fake-product">05</div>
-            <div class="live-badge">LIVE</div>
+
+            <div class="fake-product">
+              05
+            </div>
+
+            <div class="live-badge">
+              LIVE
+            </div>
+
           </div>
+
 
           <div class="auction-info">
-            <div class="auction-title">Vintage Denim</div>
-            <div class="seller">@archive</div>
+
+            <div class="auction-title">
+              Vintage Denim
+            </div>
+
+            <div class="seller">
+              @archive
+            </div>
+
 
             <div class="price-row">
+
               <div>
-                <div class="price-label">Current bid</div>
-                <div class="price">₴900</div>
+
+                <div class="price-label">
+                  Current bid
+                </div>
+
+                <div class="price">
+                  ₴900
+                </div>
+
               </div>
 
-              <button class="bid-btn" onclick="showToast('Открываем лот...')">
+
+              <button
+                class="bid-btn"
+                onclick="showToast('Открываем лот...')"
+              >
                 VIEW
               </button>
+
             </div>
+
           </div>
+
         </article>
 
 
         <article class="auction-card">
+
           <div class="product-image three">
-            <div class="fake-product">06</div>
-            <div class="live-badge">LIVE</div>
+
+            <div class="fake-product">
+              06
+            </div>
+
+            <div class="live-badge">
+              LIVE
+            </div>
+
           </div>
+
 
           <div class="auction-info">
-            <div class="auction-title">Silver Necklace</div>
-            <div class="seller">@seller06</div>
+
+            <div class="auction-title">
+              Silver Necklace
+            </div>
+
+            <div class="seller">
+              @seller06
+            </div>
+
 
             <div class="price-row">
+
               <div>
-                <div class="price-label">Current bid</div>
-                <div class="price">₴1,700</div>
+
+                <div class="price-label">
+                  Current bid
+                </div>
+
+                <div class="price">
+                  ₴1,700
+                </div>
+
               </div>
 
-              <button class="bid-btn" onclick="showToast('Открываем лот...')">
+
+              <button
+                class="bid-btn"
+                onclick="showToast('Открываем лот...')"
+              >
                 VIEW
               </button>
+
             </div>
+
           </div>
+
         </article>
 
       </div>
@@ -1053,72 +1433,128 @@
     </section>
 
 
-    <!-- ================= CREATE ================= -->
+    <!-- CREATE -->
+
     <section id="create" class="page">
 
       <div class="create-container">
 
         <div class="create-header">
-          <div class="eyebrow">SELL SOMETHING</div>
-          <h2>Create a lot</h2>
+
+          <div class="eyebrow">
+            SELL SOMETHING
+          </div>
+
+          <h2>
+            Create a lot
+          </h2>
+
           <p>
             Создай лот, установи стартовую цену и запусти аукцион.
           </p>
+
         </div>
+
 
         <div class="form-card">
 
           <div class="field">
-            <label>Photos</label>
 
-            <div class="image-upload" onclick="showToast('Загрузка фотографий будет подключена через Supabase')">
-              <strong>＋ Add photos</strong>
-              <span>JPG, PNG or WEBP</span>
+            <label>
+              Photos
+            </label>
+
+            <div
+              class="image-upload"
+              onclick="showToast('Загрузка фото подключим вместе с Storage')"
+            >
+
+              <strong>
+                ＋ Add photos
+              </strong>
+
+              <span>
+                JPG, PNG or WEBP
+              </span>
+
             </div>
+
           </div>
 
 
           <div class="field">
-            <label>Title</label>
+
+            <label>
+              Title
+            </label>
 
             <input
               type="text"
               placeholder="Например: Vintage Nike Jacket"
             >
+
           </div>
 
 
           <div class="field">
-            <label>Description</label>
+
+            <label>
+              Description
+            </label>
 
             <textarea
               placeholder="Расскажи о состоянии вещи, размере и других деталях..."
             ></textarea>
+
           </div>
 
 
           <div class="two-fields">
 
             <div class="field">
-              <label>Category</label>
+
+              <label>
+                Category
+              </label>
 
               <select>
-                <option>Clothing</option>
-                <option>Sneakers</option>
-                <option>Accessories</option>
-                <option>Vintage</option>
-                <option>Other</option>
+
+                <option>
+                  Clothing
+                </option>
+
+                <option>
+                  Sneakers
+                </option>
+
+                <option>
+                  Accessories
+                </option>
+
+                <option>
+                  Vintage
+                </option>
+
+                <option>
+                  Other
+                </option>
+
               </select>
+
             </div>
 
 
             <div class="field">
-              <label>Size</label>
+
+              <label>
+                Size
+              </label>
 
               <input
                 type="text"
                 placeholder="M"
               >
+
             </div>
 
           </div>
@@ -1127,27 +1563,54 @@
           <div class="two-fields">
 
             <div class="field">
-              <label>Starting price · ₴</label>
+
+              <label>
+                Starting price · ₴
+              </label>
 
               <input
                 type="number"
                 placeholder="1000"
                 min="1"
               >
+
             </div>
 
 
             <div class="field">
-              <label>Auction duration</label>
+
+              <label>
+                Auction duration
+              </label>
 
               <select>
-                <option>1 hour</option>
-                <option>6 hours</option>
-                <option>12 hours</option>
-                <option>24 hours</option>
-                <option>3 days</option>
-                <option>7 days</option>
+
+                <option>
+                  1 hour
+                </option>
+
+                <option>
+                  6 hours
+                </option>
+
+                <option>
+                  12 hours
+                </option>
+
+                <option>
+                  24 hours
+                </option>
+
+                <option>
+                  3 days
+                </option>
+
+                <option>
+                  7 days
+                </option>
+
               </select>
+
             </div>
 
           </div>
@@ -1155,7 +1618,7 @@
 
           <button
             class="primary-btn"
-            onclick="createDemoLot()"
+            onclick="requireAuthForCreate()"
           >
             CREATE AUCTION
           </button>
@@ -1167,24 +1630,37 @@
     </section>
 
 
-    <!-- ================= BIDS ================= -->
+    <!-- BIDS -->
+
     <section id="bids" class="page">
 
       <div class="hero">
-        <div class="eyebrow">YOUR ACTIVITY</div>
-        <h1>BIDS.</h1>
+
+        <div class="eyebrow">
+          YOUR ACTIVITY
+        </div>
+
+        <h1>
+          BIDS.
+        </h1>
+
         <p>
           Здесь будут отображаться твои ставки, выигранные лоты
           и аукционы, где тебя перебили.
         </p>
+
       </div>
 
 
       <div class="empty-state">
 
-        <div class="empty-icon">↗</div>
+        <div class="empty-icon">
+          ↗
+        </div>
 
-        <h3>No bids yet</h3>
+        <h3>
+          No bids yet
+        </h3>
 
         <p>
           Сделай первую ставку на интересующий тебя лот —
@@ -1196,22 +1672,38 @@
     </section>
 
 
-    <!-- ================= PROFILE ================= -->
+    <!-- PROFILE -->
+
     <section id="profile" class="page">
 
       <div class="profile-card">
 
         <div class="profile-top">
 
-          <div class="avatar">
+          <div
+            class="avatar"
+            id="profileAvatar"
+          >
             ?
           </div>
 
+
           <div>
-            <div class="profile-name">Guest</div>
-            <div class="profile-email">
+
+            <div
+              class="profile-name"
+              id="profileName"
+            >
+              Guest
+            </div>
+
+            <div
+              class="profile-email"
+              id="profileEmail"
+            >
               Sign in to create your account
             </div>
+
           </div>
 
         </div>
@@ -1220,47 +1712,96 @@
         <div class="profile-stats">
 
           <div class="stat">
-            <strong>0</strong>
-            <span>Lots</span>
+
+            <strong>
+              0
+            </strong>
+
+            <span>
+              Lots
+            </span>
+
           </div>
 
-          <div class="stat">
-            <strong>0</strong>
-            <span>Bids</span>
-          </div>
 
           <div class="stat">
-            <strong>0</strong>
-            <span>Wins</span>
+
+            <strong>
+              0
+            </strong>
+
+            <span>
+              Bids
+            </span>
+
+          </div>
+
+
+          <div class="stat">
+
+            <strong>
+              0
+            </strong>
+
+            <span>
+              Wins
+            </span>
+
           </div>
 
         </div>
 
 
-        <div class="profile-menu">
+        <div
+          class="profile-menu"
+          id="profileMenu"
+        >
 
           <button
             class="profile-item"
-            onclick="showToast('Авторизация будет подключена через Supabase')"
+            onclick="openAuth()"
           >
-            <span>Sign in / Register</span>
-            <span>→</span>
+
+            <span>
+              Sign in / Register
+            </span>
+
+            <span>
+              →
+            </span>
+
           </button>
+
 
           <button
             class="profile-item"
-            onclick="showToast('Настройки появятся после авторизации')"
+            onclick="showToast('Настройки появятся позже')"
           >
-            <span>Settings</span>
-            <span>→</span>
+
+            <span>
+              Settings
+            </span>
+
+            <span>
+              →
+            </span>
+
           </button>
+
 
           <button
             class="profile-item"
             onclick="showToast('Чат появится после запуска аукционов')"
           >
-            <span>Messages</span>
-            <span>→</span>
+
+            <span>
+              Messages
+            </span>
+
+            <span>
+              →
+            </span>
+
           </button>
 
         </div>
@@ -1272,7 +1813,9 @@
   </main>
 
 
-  <!-- ================= BOTTOM NAV ================= -->
+  <!-- =========================
+       BOTTOM NAV
+  ========================= -->
 
   <div class="bottom-nav-wrap">
 
@@ -1283,8 +1826,15 @@
         data-page="home"
         onclick="navigate('home', this)"
       >
-        <span class="nav-icon">⌂</span>
-        <span class="nav-label">Главная</span>
+
+        <span class="nav-icon">
+          ⌂
+        </span>
+
+        <span class="nav-label">
+          Главная
+        </span>
+
       </button>
 
 
@@ -1293,8 +1843,15 @@
         data-page="lots"
         onclick="navigate('lots', this)"
       >
-        <span class="nav-icon">◈</span>
-        <span class="nav-label">Лоты</span>
+
+        <span class="nav-icon">
+          ◈
+        </span>
+
+        <span class="nav-label">
+          Лоты
+        </span>
+
       </button>
 
 
@@ -1311,8 +1868,15 @@
         data-page="bids"
         onclick="navigate('bids', this)"
       >
-        <span class="nav-icon">↗</span>
-        <span class="nav-label">Ставки</span>
+
+        <span class="nav-icon">
+          ↗
+        </span>
+
+        <span class="nav-label">
+          Ставки
+        </span>
+
       </button>
 
 
@@ -1321,8 +1885,15 @@
         data-page="profile"
         onclick="navigate('profile', this)"
       >
-        <span class="nav-icon">○</span>
-        <span class="nav-label">Профиль</span>
+
+        <span class="nav-icon">
+          ○
+        </span>
+
+        <span class="nav-label">
+          Профиль
+        </span>
+
       </button>
 
     </nav>
@@ -1330,150 +1901,894 @@
   </div>
 
 
+  <!-- =========================
+       AUTH MODAL
+  ========================= -->
+
+  <div
+    class="modal-overlay"
+    id="authModal"
+  >
+
+    <div class="auth-modal">
+
+      <div class="auth-head">
+
+        <div>
+
+          <h2 id="authTitle">
+            Welcome
+          </h2>
+
+          <p id="authSubtitle">
+            Sign in to your ACTNSS account
+          </p>
+
+        </div>
+
+
+        <button
+          class="close-modal"
+          onclick="closeAuth()"
+        >
+          ×
+        </button>
+
+      </div>
+
+
+      <div class="auth-switch">
+
+        <button
+          id="loginTab"
+          class="active"
+          onclick="setAuthMode('login')"
+        >
+          Sign in
+        </button>
+
+        <button
+          id="signupTab"
+          onclick="setAuthMode('signup')"
+        >
+          Register
+        </button>
+
+      </div>
+
+
+      <div class="field">
+
+        <label>
+          Email
+        </label>
+
+        <input
+          id="authEmail"
+          type="email"
+          autocomplete="email"
+          placeholder="you@example.com"
+        >
+
+      </div>
+
+
+      <div class="field">
+
+        <label>
+          Password
+        </label>
+
+        <input
+          id="authPassword"
+          type="password"
+          autocomplete="current-password"
+          placeholder="••••••••"
+        >
+
+      </div>
+
+
+      <div
+        class="auth-error"
+        id="authError"
+      ></div>
+
+
+      <button
+        class="primary-btn"
+        id="authSubmit"
+        onclick="submitAuth()"
+      >
+        SIGN IN
+      </button>
+
+    </div>
+
+  </div>
+
+
   <!-- TOAST -->
-  <div id="toast" class="toast"></div>
+
+  <div
+    id="toast"
+    class="toast"
+  ></div>
 
 
   <script>
 
-    /* =========================
+    /* =====================================================
+       SUPABASE
+    ===================================================== */
+
+    const SUPABASE_URL =
+      'https://gjnkwjdczjtlknxtkyii.supabase.co';
+
+    /*
+      ВСТАВЬ СЮДА СВОЙ PUBLISHABLE KEY.
+
+      Не вставляй сюда service_role или secret key.
+    */
+
+    const SUPABASE_KEY =
+      'sb_publishable_uGRNc-jMlRG_xWOESqozSQ_awpDVbkL';
+
+
+    const supabaseClient =
+      window.supabase.createClient(
+        SUPABASE_URL,
+        SUPABASE_KEY
+      );
+
+
+    /* =====================================================
+       AUTH STATE
+    ===================================================== */
+
+    let authMode = 'login';
+
+
+    async function checkAuth() {
+
+      const {
+        data: {
+          session
+        }
+      } = await supabaseClient.auth.getSession();
+
+      updateProfile(session?.user || null);
+
+    }
+
+
+    supabaseClient.auth.onAuthStateChange(
+      async (event, session) => {
+
+        updateProfile(session?.user || null);
+
+      }
+    );
+
+
+    /* =====================================================
+       UPDATE PROFILE
+    ===================================================== */
+
+    function updateProfile(user) {
+
+      const name =
+        document.getElementById('profileName');
+
+      const email =
+        document.getElementById('profileEmail');
+
+      const avatar =
+        document.getElementById('profileAvatar');
+
+      const menu =
+        document.getElementById('profileMenu');
+
+
+      if (!user) {
+
+        name.textContent = 'Guest';
+
+        email.textContent =
+          'Sign in to create your account';
+
+        avatar.textContent = '?';
+
+
+        menu.innerHTML = `
+
+          <button
+            class="profile-item"
+            onclick="openAuth()"
+          >
+
+            <span>
+              Sign in / Register
+            </span>
+
+            <span>
+              →
+            </span>
+
+          </button>
+
+
+          <button
+            class="profile-item"
+            onclick="showToast('Настройки появятся после авторизации')"
+          >
+
+            <span>
+              Settings
+            </span>
+
+            <span>
+              →
+            </span>
+
+          </button>
+
+
+          <button
+            class="profile-item"
+            onclick="showToast('Чат появится после запуска аукционов')"
+          >
+
+            <span>
+              Messages
+            </span>
+
+            <span>
+              →
+            </span>
+
+          </button>
+
+        `;
+
+        return;
+
+      }
+
+
+      const userEmail =
+        user.email || 'ACTNSS user';
+
+
+      name.textContent =
+        userEmail.split('@')[0];
+
+
+      email.textContent =
+        userEmail;
+
+
+      avatar.textContent =
+        userEmail
+          .charAt(0)
+          .toUpperCase();
+
+
+      menu.innerHTML = `
+
+        <button
+          class="profile-item"
+          onclick="showToast('Профиль будет расширен после создания таблицы profiles')"
+        >
+
+          <span>
+            My profile
+          </span>
+
+          <span>
+            →
+          </span>
+
+        </button>
+
+
+        <button
+          class="profile-item"
+          onclick="showToast('Настройки появятся позже')"
+        >
+
+          <span>
+            Settings
+          </span>
+
+          <span>
+            →
+          </span>
+
+        </button>
+
+
+        <button
+          class="profile-item"
+          onclick="showToast('Чат появится после запуска аукционов')"
+        >
+
+          <span>
+            Messages
+          </span>
+
+          <span>
+            →
+          </span>
+
+        </button>
+
+
+        <button
+          class="profile-item"
+          onclick="logout()"
+        >
+
+          <span>
+            Log out
+          </span>
+
+          <span>
+            →
+          </span>
+
+        </button>
+
+      `;
+
+    }
+
+
+    /* =====================================================
+       AUTH MODAL
+    ===================================================== */
+
+    function openAuth() {
+
+      document
+        .getElementById('authModal')
+        .classList.add('show');
+
+      setAuthMode('login');
+
+    }
+
+
+    function closeAuth() {
+
+      document
+        .getElementById('authModal')
+        .classList.remove('show');
+
+      clearAuthError();
+
+    }
+
+
+    function setAuthMode(mode) {
+
+      authMode = mode;
+
+      const loginTab =
+        document.getElementById('loginTab');
+
+      const signupTab =
+        document.getElementById('signupTab');
+
+      const title =
+        document.getElementById('authTitle');
+
+      const subtitle =
+        document.getElementById('authSubtitle');
+
+      const submit =
+        document.getElementById('authSubmit');
+
+
+      clearAuthError();
+
+
+      if (mode === 'login') {
+
+        loginTab.classList.add('active');
+        signupTab.classList.remove('active');
+
+        title.textContent =
+          'Welcome';
+
+        subtitle.textContent =
+          'Sign in to your ACTNSS account';
+
+        submit.textContent =
+          'SIGN IN';
+
+      } else {
+
+        loginTab.classList.remove('active');
+        signupTab.classList.add('active');
+
+        title.textContent =
+          'Join ACTNSS';
+
+        subtitle.textContent =
+          'Create your auction account';
+
+        submit.textContent =
+          'CREATE ACCOUNT';
+
+      }
+
+    }
+
+
+    /* =====================================================
+       AUTH SUBMIT
+    ===================================================== */
+
+    async function submitAuth() {
+
+      const email =
+        document
+          .getElementById('authEmail')
+          .value
+          .trim();
+
+      const password =
+        document
+          .getElementById('authPassword')
+          .value;
+
+
+      clearAuthError();
+
+
+      if (!email || !password) {
+
+        showAuthError(
+          'Введите email и пароль.'
+        );
+
+        return;
+
+      }
+
+
+      if (password.length < 6) {
+
+        showAuthError(
+          'Пароль должен содержать минимум 6 символов.'
+        );
+
+        return;
+
+      }
+
+
+      const button =
+        document.getElementById('authSubmit');
+
+
+      button.classList.add('auth-loading');
+
+      button.textContent =
+        'PLEASE WAIT...';
+
+
+      try {
+
+        let result;
+
+
+        if (authMode === 'signup') {
+
+          result =
+            await supabaseClient.auth.signUp({
+              email: email,
+              password: password
+            });
+
+
+        } else {
+
+          result =
+            await supabaseClient.auth.signInWithPassword({
+              email: email,
+              password: password
+            });
+
+        }
+
+
+        if (result.error) {
+          throw result.error;
+        }
+
+
+        if (authMode === 'signup') {
+
+          if (result.data.session) {
+
+            closeAuth();
+
+            showToast(
+              'Аккаунт создан. Добро пожаловать в ACTNSS!'
+            );
+
+          } else {
+
+            closeAuth();
+
+            showToast(
+              'Аккаунт создан!'
+            );
+
+          }
+
+        } else {
+
+          closeAuth();
+
+          showToast(
+            'Ты вошёл в ACTNSS.'
+          );
+
+        }
+
+
+        document
+          .getElementById('authEmail')
+          .value = '';
+
+        document
+          .getElementById('authPassword')
+          .value = '';
+
+
+      } catch (error) {
+
+        showAuthError(
+          translateAuthError(error.message)
+        );
+
+      } finally {
+
+        button.classList.remove('auth-loading');
+
+        button.textContent =
+          authMode === 'login'
+            ? 'SIGN IN'
+            : 'CREATE ACCOUNT';
+
+      }
+
+    }
+
+
+    /* =====================================================
+       LOGOUT
+    ===================================================== */
+
+    async function logout() {
+
+      const {
+        error
+      } = await supabaseClient.auth.signOut();
+
+
+      if (error) {
+
+        showToast(
+          'Не удалось выйти из аккаунта.'
+        );
+
+        return;
+
+      }
+
+
+      showToast(
+        'Ты вышел из аккаунта.'
+      );
+
+
+      navigate('home');
+
+    }
+
+
+    /* =====================================================
+       AUTH ERROR
+    ===================================================== */
+
+    function showAuthError(message) {
+
+      const error =
+        document.getElementById('authError');
+
+      error.textContent = message;
+
+      error.classList.add('show');
+
+    }
+
+
+    function clearAuthError() {
+
+      const error =
+        document.getElementById('authError');
+
+      error.textContent = '';
+
+      error.classList.remove('show');
+
+    }
+
+
+    function translateAuthError(message) {
+
+      const text =
+        String(message || '');
+
+
+      if (
+        text.toLowerCase().includes('invalid login credentials')
+      ) {
+
+        return 'Неверный email или пароль.';
+
+      }
+
+
+      if (
+        text.toLowerCase().includes('user already registered')
+      ) {
+
+        return 'Пользователь с таким email уже зарегистрирован.';
+
+      }
+
+
+      if (
+        text.toLowerCase().includes('password should be at least')
+      ) {
+
+        return 'Пароль слишком короткий.';
+
+      }
+
+
+      if (
+        text.toLowerCase().includes('email not confirmed')
+      ) {
+
+        return 'Сначала подтвердите email.';
+
+      }
+
+
+      return text;
+
+    }
+
+
+    /* =====================================================
        NAVIGATION
-    ========================= */
+    ===================================================== */
 
-    function navigate(pageId, clickedButton = null) {
+    function navigate(
+      pageId,
+      clickedButton = null
+    ) {
 
-      document.querySelectorAll('.page').forEach(page => {
-        page.classList.remove('active');
-      });
+      document
+        .querySelectorAll('.page')
+        .forEach(page => {
+          page.classList.remove('active');
+        });
 
-      const page = document.getElementById(pageId);
+
+      const page =
+        document.getElementById(pageId);
+
 
       if (page) {
         page.classList.add('active');
       }
 
-      document.querySelectorAll('.nav-item').forEach(item => {
-        item.classList.remove('active');
-      });
+
+      document
+        .querySelectorAll('.nav-item')
+        .forEach(item => {
+          item.classList.remove('active');
+        });
+
 
       if (clickedButton) {
+
         clickedButton.classList.add('active');
+
       } else {
-        const matchingButton = document.querySelector(
-          `.nav-item[data-page="${pageId}"]`
-        );
+
+        const matchingButton =
+          document.querySelector(
+            `.nav-item[data-page="${pageId}"]`
+          );
+
 
         if (matchingButton) {
           matchingButton.classList.add('active');
         }
+
       }
+
 
       window.scrollTo({
         top: 0,
         behavior: 'smooth'
       });
+
     }
 
 
-    /* =========================
+    /* =====================================================
        TOAST
-    ========================= */
+    ===================================================== */
 
     let toastTimeout;
 
+
     function showToast(message) {
 
-      const toast = document.getElementById('toast');
+      const toast =
+        document.getElementById('toast');
 
-      toast.textContent = message;
+
+      toast.textContent =
+        message;
+
+
       toast.classList.add('show');
+
 
       clearTimeout(toastTimeout);
 
-      toastTimeout = setTimeout(() => {
-        toast.classList.remove('show');
-      }, 2500);
+
+      toastTimeout =
+        setTimeout(() => {
+
+          toast.classList.remove('show');
+
+        }, 2800);
+
     }
 
 
-    /* =========================
-       DEMO AUCTION TIMERS
-    ========================= */
+    /* =====================================================
+       TIMERS
+    ===================================================== */
 
-    const timers = document.querySelectorAll('.timer');
+    document
+      .querySelectorAll('.timer')
+      .forEach(timer => {
 
-    timers.forEach(timer => {
+        let seconds =
+          parseInt(
+            timer.dataset.seconds
+          );
 
-      let seconds = parseInt(timer.dataset.seconds);
 
-      function updateTimer() {
+        function updateTimer() {
 
-        if (seconds <= 0) {
-          timer.textContent = 'ENDED';
-          return;
+          if (seconds <= 0) {
+
+            timer.textContent =
+              'ENDED';
+
+            return;
+
+          }
+
+
+          const hours =
+            Math.floor(
+              seconds / 3600
+            );
+
+
+          const minutes =
+            Math.floor(
+              (seconds % 3600) / 60
+            );
+
+
+          const secs =
+            seconds % 60;
+
+
+          if (hours > 0) {
+
+            timer.textContent =
+              String(hours).padStart(2, '0') +
+              ':' +
+              String(minutes).padStart(2, '0') +
+              ':' +
+              String(secs).padStart(2, '0');
+
+          } else {
+
+            timer.textContent =
+              String(minutes).padStart(2, '0') +
+              ':' +
+              String(secs).padStart(2, '0');
+
+          }
+
+
+          seconds--;
+
         }
 
-        const hours = Math.floor(seconds / 3600);
-        const minutes = Math.floor((seconds % 3600) / 60);
-        const secs = seconds % 60;
 
-        if (hours > 0) {
+        updateTimer();
 
-          timer.textContent =
-            String(hours).padStart(2, '0') +
-            ':' +
-            String(minutes).padStart(2, '0') +
-            ':' +
-            String(secs).padStart(2, '0');
+        setInterval(
+          updateTimer,
+          1000
+        );
 
-        } else {
-
-          timer.textContent =
-            String(minutes).padStart(2, '0') +
-            ':' +
-            String(secs).padStart(2, '0');
-
-        }
-
-        seconds--;
-      }
-
-      updateTimer();
-
-      setInterval(updateTimer, 1000);
-
-    });
+      });
 
 
-    /* =========================
-       SEARCH DEMO
-    ========================= */
+    /* =====================================================
+       SEARCH
+    ===================================================== */
 
     function searchLots(value) {
 
-      const search = value.toLowerCase().trim();
+      const search =
+        value
+          .toLowerCase()
+          .trim();
 
-      const cards = document.querySelectorAll('#lots .auction-card');
+
+      const cards =
+        document.querySelectorAll(
+          '#lots .auction-card'
+        );
+
 
       cards.forEach(card => {
 
         const title =
-          card.querySelector('.auction-title')
+          card
+            .querySelector('.auction-title')
             ?.textContent
             .toLowerCase() || '';
 
+
         const seller =
-          card.querySelector('.seller')
+          card
+            .querySelector('.seller')
             ?.textContent
             .toLowerCase() || '';
+
 
         if (
           title.includes(search) ||
           seller.includes(search)
         ) {
+
           card.style.display = '';
+
         } else {
+
           card.style.display = 'none';
+
         }
 
       });
@@ -1481,40 +2796,102 @@
     }
 
 
-    /* =========================
+    /* =====================================================
        FILTERS
-    ========================= */
+    ===================================================== */
 
-    document.querySelectorAll('.filter').forEach(button => {
+    document
+      .querySelectorAll('.filter')
+      .forEach(button => {
 
-      button.addEventListener('click', () => {
+        button.addEventListener(
+          'click',
+          () => {
 
-        document.querySelectorAll('.filter').forEach(item => {
-          item.classList.remove('active');
-        });
+            document
+              .querySelectorAll('.filter')
+              .forEach(item => {
+                item.classList.remove('active');
+              });
 
-        button.classList.add('active');
 
-        showToast(
-          button.textContent + ' filter selected'
+            button.classList.add('active');
+
+
+            showToast(
+              button.textContent +
+              ' filter selected'
+            );
+
+          }
         );
 
       });
 
-    });
+
+    /* =====================================================
+       CREATE LOT AUTH CHECK
+    ===================================================== */
+
+    async function requireAuthForCreate() {
+
+      const {
+        data: {
+          session
+        }
+      } =
+        await supabaseClient.auth.getSession();
 
 
-    /* =========================
-       CREATE DEMO
-    ========================= */
+      if (!session) {
 
-    function createDemoLot() {
+        showToast(
+          'Сначала войди в аккаунт.'
+        );
+
+        setTimeout(() => {
+          openAuth();
+        }, 500);
+
+        return;
+
+      }
+
 
       showToast(
-        'Готово! После подключения Supabase этот лот будет сохранён.'
+        'Следующим этапом подключим сохранение лота в Supabase.'
       );
 
     }
+
+
+    /* =====================================================
+       CLOSE MODAL BY BACKGROUND
+    ===================================================== */
+
+    document
+      .getElementById('authModal')
+      .addEventListener(
+        'click',
+        event => {
+
+          if (
+            event.target.id === 'authModal'
+          ) {
+
+            closeAuth();
+
+          }
+
+        }
+      );
+
+
+    /* =====================================================
+       START
+    ===================================================== */
+
+    checkAuth();
 
   </script>
 
