@@ -1055,6 +1055,70 @@
   transform: scale(1.025);
 }
 
+    /* =================================
+   LOT THUMBNAILS
+================================= */
+
+.lot-thumbnails {
+  display: flex;
+  gap: 10px;
+
+  margin-top: 12px;
+
+  overflow-x: auto;
+
+  padding-bottom: 4px;
+}
+
+.lot-thumbnail {
+  flex: 0 0 76px;
+
+  width: 76px;
+  height: 76px;
+
+  padding: 0;
+
+  border-radius: 10px;
+
+  overflow: hidden;
+
+  background: rgba(255,255,255,0.03);
+
+  border: 1px solid rgba(255,255,255,0.08);
+
+  cursor: pointer;
+
+  opacity: 0.55;
+
+  transition:
+    opacity 0.2s ease,
+    border-color 0.2s ease,
+    transform 0.2s ease;
+}
+
+.lot-thumbnail:hover {
+  opacity: 0.85;
+  transform: translateY(-2px);
+}
+
+.lot-thumbnail.active {
+  opacity: 1;
+
+  border-color: rgba(255,255,255,0.7);
+
+  box-shadow:
+    0 0 0 1px rgba(255,255,255,0.08);
+}
+
+.lot-thumbnail img {
+  width: 100%;
+  height: 100%;
+
+  display: block;
+
+  object-fit: cover;
+}
+
 .lot-no-image {
   width: 100%;
   height: 100%;
@@ -4937,11 +5001,6 @@ function renderLotDetail(auction) {
     listing.profiles?.rating ??
     5;
 
-  const imageUrl =
-    images.length
-      ? images[0].image_url
-      : '';
-
   const safeTitle =
     escapeHtml(
       listing.title || 'Untitled lot'
@@ -4986,15 +5045,21 @@ function renderLotDetail(auction) {
       auction.minimum_bid || 0
     );
 
+  const mainImage =
+    images.length
+      ? images[0].image_url
+      : '';
+
   container.innerHTML = `
 
     <div class="lot-gallery">
 
       ${
-        imageUrl
+        mainImage
           ? `
             <img
-              src="${imageUrl}"
+              id="lotMainImage"
+              src="${mainImage}"
               alt="${safeTitle}"
               class="lot-main-image"
             >
@@ -5009,6 +5074,37 @@ function renderLotDetail(auction) {
     </div>
 
 
+    ${
+      images.length > 1
+        ? `
+          <div class="lot-thumbnails">
+
+            ${images.map((image, index) => `
+              <button
+                type="button"
+                class="lot-thumbnail ${
+                  index === 0
+                    ? 'active'
+                    : ''
+                }"
+                onclick="changeLotImage(
+                  ${index},
+                  ${JSON.stringify(images.map(img => img.image_url))}
+                )"
+              >
+                <img
+                  src="${image.image_url}"
+                  alt="Lot photo ${index + 1}"
+                >
+              </button>
+            `).join('')}
+
+          </div>
+        `
+        : ''
+    }
+
+
     <div class="lot-main-info">
 
       <div class="lot-eyebrow">
@@ -5021,13 +5117,17 @@ function renderLotDetail(auction) {
 
       <div class="lot-seller">
         @${safeUsername}
-        <span>★ ${Number(rating).toFixed(1)}</span>
+
+        <span>
+          ★ ${Number(rating).toFixed(1)}
+        </span>
       </div>
 
 
       <div class="lot-price-card">
 
         <div>
+
           <div class="lot-price-label">
             Current bid
           </div>
@@ -5035,11 +5135,18 @@ function renderLotDetail(auction) {
           <div class="lot-price">
             ₴${formatPrice(currentPrice)}
           </div>
+
         </div>
 
+
         <div class="lot-min-bid">
+
           + ₴${formatPrice(minimumBid)}
-          <span>minimum step</span>
+
+          <span>
+            minimum step
+          </span>
+
         </div>
 
       </div>
@@ -5055,7 +5162,9 @@ function renderLotDetail(auction) {
 
       <div class="lot-description">
 
-        <h3>Description</h3>
+        <h3>
+          Description
+        </h3>
 
         <p>
           ${safeDescription}
@@ -5068,22 +5177,30 @@ function renderLotDetail(auction) {
 
         <div>
           <span>Brand</span>
-          <strong>${safeBrand}</strong>
+          <strong>
+            ${safeBrand}
+          </strong>
         </div>
 
         <div>
           <span>Size</span>
-          <strong>${safeSize}</strong>
+          <strong>
+            ${safeSize}
+          </strong>
         </div>
 
         <div>
           <span>Condition</span>
-          <strong>${safeCondition}</strong>
+          <strong>
+            ${safeCondition}
+          </strong>
         </div>
 
         <div>
           <span>Category</span>
-          <strong>${safeCategory}</strong>
+          <strong>
+            ${safeCategory}
+          </strong>
         </div>
 
       </div>
@@ -5094,6 +5211,43 @@ function renderLotDetail(auction) {
 
 }
 
+
+// ================================
+// CHANGE LOT IMAGE
+// ================================
+
+function changeLotImage(
+  index,
+  imageUrls
+) {
+
+  const mainImage =
+    document.getElementById(
+      'lotMainImage'
+    );
+
+  if (!mainImage) return;
+
+  const imageUrl =
+    imageUrls[index];
+
+  if (!imageUrl) return;
+
+  mainImage.src = imageUrl;
+
+  document
+    .querySelectorAll('.lot-thumbnail')
+    .forEach((thumbnail, thumbnailIndex) => {
+
+      thumbnail.classList.toggle(
+        'active',
+        thumbnailIndex === index
+      );
+
+    });
+
+}
+    
 // ================================
 // COUNTDOWN TIMER
 // ================================
