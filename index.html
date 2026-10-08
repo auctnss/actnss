@@ -1301,6 +1301,158 @@
     0 10px 35px rgba(100,0,0,0.08);
 }
 
+    /* =================================
+   BID BOX
+================================= */
+
+.lot-bid-box {
+  margin-top: 16px;
+
+  padding: 18px;
+
+  border-radius: 14px;
+
+  background:
+    linear-gradient(
+      135deg,
+      rgba(120,0,0,0.14),
+      rgba(255,255,255,0.025)
+    );
+
+  border: 1px solid rgba(180,0,0,0.20);
+
+  box-shadow:
+    0 12px 40px rgba(0,0,0,0.20);
+}
+
+.lot-bid-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+
+  gap: 20px;
+
+  margin-bottom: 14px;
+}
+
+.lot-bid-label {
+  display: block;
+
+  margin-bottom: 5px;
+
+  color: var(--muted);
+
+  font-size: 10px;
+
+  text-transform: uppercase;
+
+  letter-spacing: 0.12em;
+}
+
+.lot-bid-header strong {
+  color: #fff;
+
+  font-size: 24px;
+
+  font-weight: 800;
+
+  letter-spacing: -0.02em;
+}
+
+.lot-bid-hint {
+  color: var(--muted);
+
+  font-size: 10px;
+
+  text-transform: uppercase;
+
+  letter-spacing: 0.1em;
+}
+
+.lot-bid-input-row {
+  display: flex;
+
+  gap: 10px;
+}
+
+.lot-bid-input-row input {
+  flex: 1;
+
+  min-width: 0;
+
+  height: 48px;
+
+  padding: 0 14px;
+
+  border-radius: 10px;
+
+  border: 1px solid rgba(255,255,255,0.10);
+
+  background: rgba(0,0,0,0.25);
+
+  color: #fff;
+
+  font-size: 14px;
+
+  outline: none;
+}
+
+.lot-bid-input-row input:focus {
+  border-color: rgba(255,255,255,0.25);
+}
+
+.lot-bid-button {
+  height: 48px;
+
+  padding: 0 20px;
+
+  border: 0;
+
+  border-radius: 10px;
+
+  background: #fff;
+
+  color: #0b0b0d;
+
+  font-size: 11px;
+
+  font-weight: 800;
+
+  letter-spacing: 0.06em;
+
+  cursor: pointer;
+
+  transition:
+    transform 0.2s ease,
+    opacity 0.2s ease;
+}
+
+.lot-bid-button:hover {
+  transform: translateY(-1px);
+
+  opacity: 0.9;
+}
+
+.lot-bid-minimum {
+  margin-top: 10px;
+
+  color: var(--muted);
+
+  font-size: 10px;
+}
+
+@media (max-width: 480px) {
+
+  .lot-bid-input-row {
+    flex-direction: column;
+  }
+
+  .lot-bid-button {
+    width: 100%;
+  }
+
+}
+
 
 /* =================================
    DESCRIPTION
@@ -5171,6 +5323,51 @@ function renderLotDetail(auction) {
       >
         ${formatCountdown(auction.ends_at)}
       </div>
+
+      <div class="lot-bid-box">
+
+  <div class="lot-bid-header">
+    <div>
+      <span class="lot-bid-label">
+        Your bid
+      </span>
+
+      <strong>
+        ₴${formatPrice(currentPrice + minimumBid)}
+      </strong>
+    </div>
+
+    <span class="lot-bid-hint">
+      Minimum
+    </span>
+  </div>
+
+  <div class="lot-bid-input-row">
+
+    <input
+      type="number"
+      id="bidAmount"
+      min="${currentPrice + minimumBid}"
+      step="${minimumBid}"
+      value="${currentPrice + minimumBid}"
+      placeholder="${currentPrice + minimumBid}"
+    >
+
+    <button
+      type="button"
+      class="lot-bid-button"
+      onclick="placeBid('${auction.id}')"
+    >
+      PLACE BID
+    </button>
+
+  </div>
+
+  <div class="lot-bid-minimum">
+    Minimum bid: ₴${formatPrice(currentPrice + minimumBid)}
+  </div>
+
+</div>
 
 
       <div class="lot-description">
