@@ -1016,6 +1016,10 @@
 /* =================================
    GALLERY
 ================================= */
+    
+ .lot-gallery-column {
+  min-width: 0;
+}
 
 .lot-gallery {
   width: 100%;
@@ -5050,59 +5054,67 @@ function renderLotDetail(auction) {
       ? images[0].image_url
       : '';
 
-  container.innerHTML = `
+ container.innerHTML = `
 
-    <div class="lot-gallery">
+    <div class="lot-gallery-column">
+
+      <div class="lot-gallery">
+
+        ${
+          mainImage
+            ? `
+              <img
+                id="lotMainImage"
+                src="${mainImage}"
+                alt="${safeTitle}"
+                class="lot-main-image"
+              >
+            `
+            : `
+              <div class="lot-no-image">
+                ACTNSS
+              </div>
+            `
+        }
+
+      </div>
+
 
       ${
-        mainImage
+        images.length > 1
           ? `
-            <img
-              id="lotMainImage"
-              src="${mainImage}"
-              alt="${safeTitle}"
-              class="lot-main-image"
-            >
-          `
-          : `
-            <div class="lot-no-image">
-              ACTNSS
+            <div class="lot-thumbnails">
+
+              ${images.map((image, index) => `
+                <button
+                  type="button"
+                  class="lot-thumbnail ${
+                    index === 0
+                      ? 'active'
+                      : ''
+                  }"
+                  onclick="changeLotImage(
+                    ${index},
+                    ${JSON.stringify(
+                      images.map(
+                        img => img.image_url
+                      )
+                    )}
+                  )"
+                >
+                  <img
+                    src="${image.image_url}"
+                    alt="Lot photo ${index + 1}"
+                  >
+                </button>
+              `).join('')}
+
             </div>
           `
+          : ''
       }
 
     </div>
-
-
-    ${
-      images.length > 1
-        ? `
-          <div class="lot-thumbnails">
-
-            ${images.map((image, index) => `
-              <button
-                type="button"
-                class="lot-thumbnail ${
-                  index === 0
-                    ? 'active'
-                    : ''
-                }"
-                onclick="changeLotImage(
-                  ${index},
-                  ${JSON.stringify(images.map(img => img.image_url))}
-                )"
-              >
-                <img
-                  src="${image.image_url}"
-                  alt="Lot photo ${index + 1}"
-                >
-              </button>
-            `).join('')}
-
-          </div>
-        `
-        : ''
-    }
 
 
     <div class="lot-main-info">
