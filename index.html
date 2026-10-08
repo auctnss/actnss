@@ -5203,6 +5203,18 @@ function updateAuctionPriceRealtime(
 
   }
 
+  const currentBidElement =
+  document.querySelector(
+    '.lot-price-card .price'
+  );
+
+if (currentBidElement) {
+
+  currentBidElement.textContent =
+    `₴${formatPrice(currentPrice)}`;
+
+}
+
 
   const bidInput =
     document.getElementById(
