@@ -1441,6 +1441,99 @@
   font-size: 10px;
 }
 
+    /* BID HISTORY */
+
+.lot-bid-history {
+  margin-top: 16px;
+  padding: 18px;
+
+  border-radius: 14px;
+
+  background: rgba(255,255,255,0.025);
+  border: 1px solid rgba(255,255,255,0.08);
+}
+
+.lot-bid-history-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  margin-bottom: 14px;
+}
+
+.lot-bid-history-header span:first-child {
+  color: #fff;
+
+  font-size: 11px;
+  font-weight: 800;
+
+  text-transform: uppercase;
+  letter-spacing: .10em;
+}
+
+.lot-bid-history-header span:last-child {
+  color: var(--muted);
+
+  font-size: 10px;
+}
+
+.lot-bid-history-list {
+  display: flex;
+  flex-direction: column;
+
+  gap: 8px;
+}
+
+.lot-bid-history-empty {
+  padding: 14px 0;
+
+  color: var(--muted);
+
+  font-size: 11px;
+
+  text-align: center;
+}
+
+.lot-bid-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  padding: 12px 13px;
+
+  border-radius: 10px;
+
+  background: rgba(255,255,255,0.025);
+  border: 1px solid rgba(255,255,255,0.05);
+}
+
+.lot-bid-user {
+  display: flex;
+  flex-direction: column;
+
+  gap: 3px;
+}
+
+.lot-bid-username {
+  color: #fff;
+
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.lot-bid-time {
+  color: var(--muted);
+
+  font-size: 9px;
+}
+
+.lot-bid-amount {
+  color: #fff;
+
+  font-size: 13px;
+  font-weight: 800;
+}
+
 @media (max-width: 480px) {
 
   .lot-bid-input-row {
