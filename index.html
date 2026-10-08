@@ -5343,9 +5343,13 @@ async function loadBidHistory(auctionId) {
   } catch (error) {
 
     console.error(
-      'LOAD BID HISTORY ERROR:',
-      error
-    );
+  'LOAD BID HISTORY ERROR:',
+  JSON.stringify(
+    error,
+    null,
+    2
+  )
+);
 
     list.innerHTML = `
       <div class="lot-bid-history-empty">
