@@ -960,6 +960,413 @@
         height: 49px;
       }
     }
+
+/* =================================
+   LOT DETAIL
+================================= */
+
+.lot-detail-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 30px 24px 120px;
+}
+
+.lot-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+
+  border: 1px solid rgba(255,255,255,0.10);
+  background: rgba(255,255,255,0.035);
+  color: #fff;
+
+  padding: 10px 15px;
+  border-radius: 10px;
+
+  font-size: 12px;
+  font-weight: 600;
+
+  cursor: pointer;
+
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease,
+    transform 0.2s ease;
+}
+
+.lot-back:hover {
+  background: rgba(255,255,255,0.07);
+  border-color: rgba(255,255,255,0.18);
+  transform: translateX(-2px);
+}
+
+
+.lot-detail-content {
+  margin-top: 28px;
+
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(360px, 0.85fr);
+
+  gap: 42px;
+
+  align-items: start;
+}
+
+
+/* =================================
+   GALLERY
+================================= */
+
+.lot-gallery {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+
+  overflow: hidden;
+
+  border-radius: 18px;
+
+  background:
+    linear-gradient(
+      145deg,
+      rgba(255,255,255,0.055),
+      rgba(255,255,255,0.018)
+    );
+
+  border: 1px solid rgba(255,255,255,0.08);
+
+  position: relative;
+
+  box-shadow:
+    0 25px 80px rgba(0,0,0,0.35);
+}
+
+.lot-main-image {
+  width: 100%;
+  height: 100%;
+
+  display: block;
+
+  object-fit: cover;
+
+  transition: transform 0.5s ease;
+}
+
+.lot-gallery:hover .lot-main-image {
+  transform: scale(1.025);
+}
+
+.lot-no-image {
+  width: 100%;
+  height: 100%;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  color: rgba(255,255,255,0.25);
+
+  font-size: 34px;
+  font-weight: 800;
+  letter-spacing: 4px;
+}
+
+
+/* =================================
+   MAIN INFO
+================================= */
+
+.lot-main-info {
+  padding-top: 8px;
+}
+
+.lot-eyebrow {
+  color: var(--muted);
+
+  font-size: 10px;
+  font-weight: 700;
+
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+
+  margin-bottom: 10px;
+}
+
+.lot-title {
+  margin: 0;
+
+  color: #fff;
+
+  font-size: clamp(30px, 4vw, 48px);
+
+  line-height: 1.02;
+
+  letter-spacing: -0.04em;
+
+  font-weight: 800;
+}
+
+.lot-seller {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  margin-top: 14px;
+
+  color: var(--muted);
+
+  font-size: 12px;
+}
+
+.lot-seller span {
+  color: #fff;
+
+  padding: 5px 8px;
+
+  border-radius: 7px;
+
+  background: rgba(255,255,255,0.055);
+
+  border: 1px solid rgba(255,255,255,0.07);
+}
+
+
+/* =================================
+   PRICE CARD
+================================= */
+
+.lot-price-card {
+  margin-top: 28px;
+
+  padding: 20px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 20px;
+
+  border-radius: 16px;
+
+  background:
+    linear-gradient(
+      135deg,
+      rgba(255,255,255,0.055),
+      rgba(255,255,255,0.02)
+    );
+
+  border: 1px solid rgba(255,255,255,0.09);
+
+  box-shadow:
+    0 15px 50px rgba(0,0,0,0.25);
+}
+
+.lot-price-label {
+  color: var(--muted);
+
+  font-size: 10px;
+  text-transform: uppercase;
+
+  letter-spacing: 0.12em;
+
+  margin-bottom: 5px;
+}
+
+.lot-price {
+  color: #fff;
+
+  font-size: 32px;
+
+  font-weight: 800;
+
+  letter-spacing: -0.03em;
+}
+
+.lot-min-bid {
+  text-align: right;
+
+  color: #fff;
+
+  font-size: 14px;
+
+  font-weight: 700;
+}
+
+.lot-min-bid span {
+  display: block;
+
+  margin-top: 4px;
+
+  color: var(--muted);
+
+  font-size: 10px;
+
+  font-weight: 500;
+}
+
+
+/* =================================
+   COUNTDOWN
+================================= */
+
+.lot-detail-countdown {
+  margin-top: 14px;
+
+  padding: 15px 18px;
+
+  border-radius: 12px;
+
+  background: rgba(120,0,0,0.12);
+
+  border: 1px solid rgba(180,0,0,0.18);
+
+  color: #fff;
+
+  text-align: center;
+
+  font-size: 14px;
+
+  font-weight: 700;
+
+  letter-spacing: 0.04em;
+
+  box-shadow:
+    0 10px 35px rgba(100,0,0,0.08);
+}
+
+
+/* =================================
+   DESCRIPTION
+================================= */
+
+.lot-description {
+  margin-top: 30px;
+}
+
+.lot-description h3 {
+  margin: 0 0 10px;
+
+  color: #fff;
+
+  font-size: 13px;
+
+  text-transform: uppercase;
+
+  letter-spacing: 0.1em;
+}
+
+.lot-description p {
+  margin: 0;
+
+  color: var(--muted);
+
+  font-size: 14px;
+
+  line-height: 1.7;
+}
+
+
+/* =================================
+   SPECS
+================================= */
+
+.lot-specs {
+  margin-top: 28px;
+
+  display: grid;
+
+  grid-template-columns: 1fr 1fr;
+
+  gap: 1px;
+
+  overflow: hidden;
+
+  border-radius: 14px;
+
+  background: rgba(255,255,255,0.08);
+
+  border: 1px solid rgba(255,255,255,0.08);
+}
+
+.lot-specs > div {
+  padding: 15px;
+
+  background: rgba(10,10,12,0.95);
+}
+
+.lot-specs span {
+  display: block;
+
+  margin-bottom: 6px;
+
+  color: var(--muted);
+
+  font-size: 10px;
+
+  text-transform: uppercase;
+
+  letter-spacing: 0.1em;
+}
+
+.lot-specs strong {
+  color: #fff;
+
+  font-size: 13px;
+
+  font-weight: 600;
+}
+
+
+/* =================================
+   MOBILE
+================================= */
+
+@media (max-width: 850px) {
+
+  .lot-detail-container {
+    padding:
+      20px
+      16px
+      110px;
+  }
+
+  .lot-detail-content {
+    grid-template-columns: 1fr;
+
+    gap: 26px;
+  }
+
+  .lot-gallery {
+    aspect-ratio: 1 / 1;
+  }
+
+  .lot-main-info {
+    padding-top: 0;
+  }
+
+  .lot-title {
+    font-size: 34px;
+  }
+
+}
+
+@media (max-width: 480px) {
+
+  .lot-price-card {
+    align-items: flex-start;
+
+    flex-direction: column;
+  }
+
+  .lot-min-bid {
+    text-align: left;
+  }
+
+  .lot-specs {
+    grid-template-columns: 1fr;
+  }
+
+}
+    
   </style>
 </head>
 
