@@ -3207,19 +3207,21 @@ const imagePreview =
   document.getElementById('imagePreview');
 
 
+// Здесь храним все выбранные фотографии
+let selectedListingImages = [];
+
+
 if (listingImagesInput) {
 
   listingImagesInput.addEventListener(
     'change',
     function () {
 
-      imagePreview.innerHTML = '';
-
-      const files =
+      const newFiles =
         Array.from(this.files || []);
 
 
-      if (!files.length) {
+      if (!newFiles.length) {
         return;
       }
 
@@ -3231,10 +3233,7 @@ if (listingImagesInput) {
       ];
 
 
-      const validFiles = [];
-
-
-      files.forEach((file) => {
+      newFiles.forEach((file) => {
 
         if (!allowedTypes.includes(file.type)) {
 
@@ -3256,85 +3255,157 @@ if (listingImagesInput) {
         }
 
 
-        validFiles.push(file);
+        if (selectedListingImages.length >= 10) {
+
+          showToast(
+            'Можно добавить максимум 10 фотографий.'
+          );
+
+          return;
+        }
+
+
+        selectedListingImages.push(file);
 
       });
 
 
-      if (!validFiles.length) {
-        this.value = '';
-        return;
-      }
+      // Очищаем input,
+      // чтобы можно было снова выбрать тот же файл
+      this.value = '';
 
 
-      // Ограничиваем количество фотографий
-      if (validFiles.length > 10) {
+      renderImagePreview();
 
-        showToast(
-          'Можно добавить максимум 10 фотографий.'
-        );
+    }
+  );
 
-        validFiles.splice(10);
-      }
+}
 
 
-      // Показываем превью
-      validFiles.forEach((file) => {
+// ================================
+// RENDER IMAGE PREVIEW
+// ================================
 
-        const reader =
-          new FileReader();
+function renderImagePreview() {
 
-
-        reader.onload = function (event) {
-
-          const wrapper =
-            document.createElement('div');
+  imagePreview.innerHTML = '';
 
 
-          wrapper.style.display =
-            'inline-block';
+  selectedListingImages.forEach(
+    (file, index) => {
 
-          wrapper.style.marginRight =
-            '8px';
-
-          wrapper.style.marginBottom =
-            '8px';
+      const wrapper =
+        document.createElement('div');
 
 
-          const image =
-            document.createElement('img');
+      wrapper.style.display =
+        'inline-block';
+
+      wrapper.style.position =
+        'relative';
+
+      wrapper.style.marginRight =
+        '8px';
+
+      wrapper.style.marginBottom =
+        '8px';
 
 
-          image.src =
-            event.target.result;
+      const image =
+        document.createElement('img');
 
 
-          image.style.width =
-            '90px';
-
-          image.style.height =
-            '90px';
-
-          image.style.objectFit =
-            'cover';
-
-          image.style.borderRadius =
-            '10px';
-
-          image.style.border =
-            '1px solid rgba(255,255,255,0.12)';
+      image.src =
+        URL.createObjectURL(file);
 
 
-          wrapper.appendChild(image);
+      image.style.width =
+        '90px';
 
-          imagePreview.appendChild(wrapper);
+      image.style.height =
+        '90px';
+
+      image.style.objectFit =
+        'cover';
+
+      image.style.borderRadius =
+        '10px';
+
+      image.style.border =
+        '1px solid rgba(255,255,255,0.12)';
+
+
+      // Кнопка удаления фотографии
+      const removeButton =
+        document.createElement('button');
+
+
+      removeButton.type =
+        'button';
+
+      removeButton.textContent =
+        '×';
+
+
+      removeButton.style.position =
+        'absolute';
+
+      removeButton.style.top =
+        '5px';
+
+      removeButton.style.right =
+        '5px';
+
+      removeButton.style.width =
+        '24px';
+
+      removeButton.style.height =
+        '24px';
+
+      removeButton.style.border =
+        'none';
+
+      removeButton.style.borderRadius =
+        '50%';
+
+      removeButton.style.background =
+        'rgba(0,0,0,0.75)';
+
+      removeButton.style.color =
+        'white';
+
+      removeButton.style.cursor =
+        'pointer';
+
+      removeButton.style.fontSize =
+        '16px';
+
+      removeButton.style.lineHeight =
+        '24px';
+
+      removeButton.style.padding =
+        '0';
+
+
+      removeButton.onclick =
+        function () {
+
+          selectedListingImages.splice(
+            index,
+            1
+          );
+
+          renderImagePreview();
 
         };
 
 
-        reader.readAsDataURL(file);
+      wrapper.appendChild(image);
 
-      });
+      wrapper.appendChild(removeButton);
+
+      imagePreview.appendChild(wrapper);
 
     }
   );
