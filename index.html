@@ -4513,6 +4513,11 @@ function renderLots() {
           ? images[0].image_url
           : '';
 
+      window.currentLotImages =
+  images.map(
+    image => image.image_url
+  );
+
 
       // SELLER
 
@@ -5086,23 +5091,19 @@ function renderLotDetail(auction) {
             <div class="lot-thumbnails">
 
               ${images.map((image, index) => `
-                <button
-                  type="button"
-                  class="lot-thumbnail ${
-                    index === 0
-                      ? 'active'
-                      : ''
-                  }"
-                  onclick="changeLotImage(
-                    ${index},
-                    ${JSON.stringify(
-                      images.map(
-                        img => img.image_url
-                      )
-                    )}
-                  )"
-                >
-                  <img
+  <button
+    type="button"
+    class="lot-thumbnail ${
+      index === 0
+        ? 'active'
+        : ''
+    }"
+    onclick="changeLotImage(
+      ${index},
+      window.currentLotImages
+    )"
+  >
+    <img
                     src="${image.image_url}"
                     alt="Lot photo ${index + 1}"
                   >
