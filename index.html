@@ -3742,6 +3742,648 @@ async function createAuction() {
 
 }
 
+    // ================================
+// LOTS — SUPABASE
+// ================================
+
+let allLots = [];
+let currentLotsFilter = 'All';
+let currentLotsSearch = '';
+
+
+// ================================
+// LOAD LOTS
+// ================================
+
+async function loadLots() {
+
+  const grid =
+    document.getElementById('auctionGrid');
+
+  const count =
+    document.getElementById('lotsCount');
+
+  if (!grid) {
+    return;
+  }
+
+  grid.innerHTML = `
+    <div
+      style="
+        grid-column: 1 / -1;
+        text-align: center;
+        padding: 50px 20px;
+        color: var(--muted);
+      "
+    >
+      Loading lots...
+    </div>
+  `;
+
+  try {
+
+    const {
+      data,
+      error
+    } = await supabaseClient
+      .from('auctions')
+      .select(`
+        id,
+        listing_id,
+        start_price,
+        current_price,
+        minimum_bid,
+        starts_at,
+        ends_at,
+        status,
+        listings (
+          id,
+          title,
+          description,
+          category,
+          brand,
+          size,
+          condition,
+          seller_id,
+          profiles (
+            username,
+            rating
+          ),
+          listing_images (
+            image_url,
+            position
+          )
+        )
+      `)
+      .eq('status', 'active')
+      .order('created_at', {
+        ascending: false
+      });
+
+    if (error) {
+      throw error;
+    }
+
+    allLots = data || [];
+
+    renderLots();
+
+  } catch (error) {
+
+    console.error(
+      'LOAD LOTS ERROR:',
+      error
+    );
+
+    grid.innerHTML = `
+      <div
+        style="
+          grid-column: 1 / -1;
+          text-align: center;
+          padding: 50px 20px;
+          color: var(--muted);
+        "
+      >
+        Не удалось загрузить лоты.
+      </div>
+    `;
+
+    if (count) {
+      count.textContent = '0 auctions';
+    }
+  }
+}
+
+
+// ================================
+// RENDER LOTS
+// ================================
+
+function renderLots() {
+
+  const grid =
+    document.getElementById('auctionGrid');
+
+  const count =
+    document.getElementById('lotsCount');
+
+  if (!grid) {
+    return;
+  }
+
+  let lots =
+    [...allLots];
+
+
+  // ----------------
+  // FILTER
+  // ----------------
+
+  if (currentLotsFilter !== 'All') {
+
+    lots =
+      lots.filter((auction) => {
+
+        return (
+          auction.listings &&
+          auction.listings.category ===
+            currentLotsFilter
+        );
+
+      });
+
+  }
+
+
+  // ----------------
+  // SEARCH
+  // ----------------
+
+  if (currentLotsSearch) {
+
+    const search =
+      currentLotsSearch.toLowerCase();
+
+    lots =
+      lots.filter((auction) => {
+
+        const listing =
+          auction.listings;
+
+        if (!listing) {
+          return false;
+        }
+
+        const text = [
+          listing.title,
+          listing.description,
+          listing.brand,
+          listing.category,
+          listing.size,
+          listing.condition
+        ]
+          .filter(Boolean)
+          .join(' ')
+          .toLowerCase();
+
+        return text.includes(search);
+
+      });
+
+  }
+
+
+  // ----------------
+  // COUNT
+  // ----------------
+
+  if (count) {
+
+    count.textContent =
+      `${lots.length} ${
+        lots.length === 1
+          ? 'auction'
+          : 'auctions'
+      }`;
+
+  }
+
+
+  // ----------------
+  // EMPTY
+  // ----------------
+
+  if (!lots.length) {
+
+    grid.innerHTML = `
+      <div
+        style="
+          grid-column: 1 / -1;
+          text-align: center;
+          padding: 60px 20px;
+          color: var(--muted);
+        "
+      >
+        No active lots found.
+      </div>
+    `;
+
+    return;
+  }
+
+
+  // ----------------
+  // CARDS
+  // ----------------
+
+  grid.innerHTML =
+    lots.map((auction) => {
+
+      const listing =
+        auction.listings;
+
+      if (!listing) {
+        return '';
+      }
+
+
+      // IMAGE
+
+      const images =
+        listing.listing_images || [];
+
+      images.sort(
+        (a, b) =>
+          (a.position || 0) -
+          (b.position || 0)
+      );
+
+      const imageUrl =
+        images.length
+          ? images[0].image_url
+          : '';
+
+
+      // SELLER
+
+      const username =
+        listing.profiles?.username ||
+        'unknown';
+
+
+      // PRICE
+
+      const currentPrice =
+        Number(
+          auction.current_price || 0
+        );
+
+
+      // ESCAPE HTML
+
+      const safeTitle =
+        escapeHtml(
+          listing.title || 'Untitled lot'
+        );
+
+      const safeUsername =
+        escapeHtml(
+          username
+        );
+
+
+      return `
+
+        <article
+          class="auction-card"
+          onclick="openLot('${auction.id}')"
+          style="cursor:pointer;"
+        >
+
+          <div
+            class="product-image"
+            style="
+              position:relative;
+              overflow:hidden;
+            "
+          >
+
+            ${
+              imageUrl
+                ? `
+                  <img
+                    src="${imageUrl}"
+                    alt="${safeTitle}"
+                    style="
+                      width:100%;
+                      height:100%;
+                      object-fit:cover;
+                      display:block;
+                    "
+                  >
+                `
+                : `
+                  <div
+                    class="fake-product"
+                  >
+                    ACTNSS
+                  </div>
+                `
+            }
+
+            <div class="live-badge">
+              LIVE
+            </div>
+
+          </div>
+
+
+          <div class="auction-info">
+
+            <div class="auction-title">
+              ${safeTitle}
+            </div>
+
+            <div class="seller">
+              @${safeUsername}
+            </div>
+
+
+            <div
+              style="
+                margin-top:8px;
+                color:var(--muted);
+                font-size:11px;
+              "
+            >
+              ${
+                escapeHtml(
+                  listing.brand ||
+                  listing.category ||
+                  ''
+                )
+              }
+            </div>
+
+
+            <div class="price-row">
+
+              <div>
+
+                <div class="price-label">
+                  Current bid
+                </div>
+
+                <div class="price">
+                  ₴${formatPrice(currentPrice)}
+                </div>
+
+              </div>
+
+
+              <div
+                class="bid-btn"
+              >
+                VIEW
+              </div>
+
+            </div>
+
+
+            <div
+              class="lot-countdown"
+              data-end="${auction.ends_at}"
+              style="
+                margin-top:10px;
+                font-size:11px;
+                color:var(--muted);
+              "
+            >
+              ${formatCountdown(
+                auction.ends_at
+              )}
+            </div>
+
+          </div>
+
+        </article>
+
+      `;
+
+    }).join('');
+
+
+  updateLotCountdowns();
+}
+
+
+// ================================
+// SEARCH
+// ================================
+
+function searchLots(value) {
+
+  currentLotsSearch =
+    (value || '').trim();
+
+  renderLots();
+}
+
+
+// ================================
+// FILTER
+// ================================
+
+function filterLots(
+  category,
+  button
+) {
+
+  currentLotsFilter =
+    category;
+
+
+  document
+    .querySelectorAll(
+      '#lots .filter'
+    )
+    .forEach((item) => {
+
+      item.classList.remove(
+        'active'
+      );
+
+    });
+
+
+  if (button) {
+
+    button.classList.add(
+      'active'
+    );
+
+  }
+
+
+  renderLots();
+}
+
+
+// ================================
+// COUNTDOWN
+// ================================
+
+function formatCountdown(
+  endTime
+) {
+
+  const end =
+    new Date(endTime).getTime();
+
+  const now =
+    Date.now();
+
+  const difference =
+    end - now;
+
+
+  if (difference <= 0) {
+    return 'Ended';
+  }
+
+
+  const totalSeconds =
+    Math.floor(
+      difference / 1000
+    );
+
+
+  const days =
+    Math.floor(
+      totalSeconds / 86400
+    );
+
+  const hours =
+    Math.floor(
+      (totalSeconds % 86400) /
+      3600
+    );
+
+  const minutes =
+    Math.floor(
+      (totalSeconds % 3600) /
+      60
+    );
+
+  const seconds =
+    totalSeconds % 60;
+
+
+  if (days > 0) {
+
+    return `Ends in ${days}d ${hours}h`;
+
+  }
+
+
+  return `Ends in ${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+
+}
+
+
+// ================================
+// UPDATE COUNTDOWNS
+// ================================
+
+function updateLotCountdowns() {
+
+  document
+    .querySelectorAll(
+      '.lot-countdown'
+    )
+    .forEach((element) => {
+
+      const endTime =
+        element.dataset.end;
+
+      if (!endTime) {
+        return;
+      }
+
+      element.textContent =
+        formatCountdown(
+          endTime
+        );
+
+    });
+
+}
+
+
+// ================================
+// PRICE FORMAT
+// ================================
+
+function formatPrice(
+  value
+) {
+
+  return Number(
+    value || 0
+  ).toLocaleString(
+    'uk-UA'
+  );
+
+}
+
+
+// ================================
+// HTML ESCAPE
+// ================================
+
+function escapeHtml(
+  value
+) {
+
+  return String(
+    value || ''
+  )
+    .replace(
+      /&/g,
+      '&amp;'
+    )
+    .replace(
+      /</g,
+      '&lt;'
+    )
+    .replace(
+      />/g,
+      '&gt;'
+    )
+    .replace(
+      /"/g,
+      '&quot;'
+    )
+    .replace(
+      /'/g,
+      '&#039;'
+    );
+
+}
+
+
+// ================================
+// OPEN LOT
+// ================================
+
+function openLot(
+  auctionId
+) {
+
+  showToast(
+    'Открываем лот...'
+  );
+
+  console.log(
+    'OPEN AUCTION:',
+    auctionId
+  );
+
+}
+
+
+// ================================
+// COUNTDOWN TIMER
+// ================================
+
+setInterval(
+  updateLotCountdowns,
+  1000
+);
+
+    // LOAD LOTS WHEN PAGE OPENS
+loadLots();
+
   </script>
 
 </body>
