@@ -1466,197 +1466,302 @@
 
     <section id="create" class="page">
 
-      <div class="create-container">
+  <div class="create-container">
 
-        <div class="create-header">
+    <div class="create-header">
 
-          <div class="eyebrow">
-            SELL SOMETHING
-          </div>
+      <div class="eyebrow">
+        SELL SOMETHING
+      </div>
 
-          <h2>
-            Create a lot
-          </h2>
+      <h2>
+        Create a lot
+      </h2>
 
-          <p>
-            Создай лот, установи стартовую цену и запусти аукцион.
-          </p>
+      <p>
+        Создай лот, установи стартовую цену и запусти аукцион.
+      </p>
+
+    </div>
+
+
+    <div class="form-card">
+
+
+      <!-- PHOTOS -->
+
+      <div class="field">
+
+        <label>
+          Photos
+        </label>
+
+        <input
+          type="file"
+          id="listingImages"
+          accept="image/jpeg,image/png,image/webp"
+          multiple
+          hidden
+        >
+
+        <div
+          class="image-upload"
+          onclick="document.getElementById('listingImages').click()"
+        >
+
+          <strong>
+            ＋ Add photos
+          </strong>
+
+          <span>
+            JPG, PNG or WEBP · Max 10 MB each
+          </span>
+
+        </div>
+
+        <div
+          id="imagePreview"
+          style="margin-top:12px;"
+        ></div>
+
+      </div>
+
+
+      <!-- TITLE -->
+
+      <div class="field">
+
+        <label>
+          Title
+        </label>
+
+        <input
+          type="text"
+          id="listingTitle"
+          placeholder="Например: Vintage Nike Jacket"
+          maxlength="100"
+        >
+
+      </div>
+
+
+      <!-- DESCRIPTION -->
+
+      <div class="field">
+
+        <label>
+          Description
+        </label>
+
+        <textarea
+          id="listingDescription"
+          placeholder="Расскажи о состоянии вещи, размере и других деталях..."
+          maxlength="2000"
+        ></textarea>
+
+      </div>
+
+
+      <!-- CATEGORY + SIZE -->
+
+      <div class="two-fields">
+
+        <div class="field">
+
+          <label>
+            Category
+          </label>
+
+          <select id="listingCategory">
+
+            <option value="Clothing">
+              Clothing
+            </option>
+
+            <option value="Sneakers">
+              Sneakers
+            </option>
+
+            <option value="Accessories">
+              Accessories
+            </option>
+
+            <option value="Vintage">
+              Vintage
+            </option>
+
+            <option value="Other">
+              Other
+            </option>
+
+          </select>
 
         </div>
 
 
-        <div class="form-card">
+        <div class="field">
 
-          <div class="field">
+          <label>
+            Size
+          </label>
 
-            <label>
-              Photos
-            </label>
-
-            <div
-              class="image-upload"
-              onclick="showToast('Загрузка фото подключим вместе с Storage')"
-            >
-
-              <strong>
-                ＋ Add photos
-              </strong>
-
-              <span>
-                JPG, PNG or WEBP
-              </span>
-
-            </div>
-
-          </div>
-
-
-          <div class="field">
-
-            <label>
-              Title
-            </label>
-
-            <input
-              type="text"
-              placeholder="Например: Vintage Nike Jacket"
-            >
-
-          </div>
-
-
-          <div class="field">
-
-            <label>
-              Description
-            </label>
-
-            <textarea
-              placeholder="Расскажи о состоянии вещи, размере и других деталях..."
-            ></textarea>
-
-          </div>
-
-
-          <div class="two-fields">
-
-            <div class="field">
-
-              <label>
-                Category
-              </label>
-
-              <select>
-
-                <option>
-                  Clothing
-                </option>
-
-                <option>
-                  Sneakers
-                </option>
-
-                <option>
-                  Accessories
-                </option>
-
-                <option>
-                  Vintage
-                </option>
-
-                <option>
-                  Other
-                </option>
-
-              </select>
-
-            </div>
-
-
-            <div class="field">
-
-              <label>
-                Size
-              </label>
-
-              <input
-                type="text"
-                placeholder="M"
-              >
-
-            </div>
-
-          </div>
-
-
-          <div class="two-fields">
-
-            <div class="field">
-
-              <label>
-                Starting price · ₴
-              </label>
-
-              <input
-                type="number"
-                placeholder="1000"
-                min="1"
-              >
-
-            </div>
-
-
-            <div class="field">
-
-              <label>
-                Auction duration
-              </label>
-
-              <select>
-
-                <option>
-                  1 hour
-                </option>
-
-                <option>
-                  6 hours
-                </option>
-
-                <option>
-                  12 hours
-                </option>
-
-                <option>
-                  24 hours
-                </option>
-
-                <option>
-                  3 days
-                </option>
-
-                <option>
-                  7 days
-                </option>
-
-              </select>
-
-            </div>
-
-          </div>
-
-
-          <button
-            class="primary-btn"
-            onclick="requireAuthForCreate()"
+          <input
+            type="text"
+            id="listingSize"
+            placeholder="M"
+            maxlength="20"
           >
-            CREATE AUCTION
-          </button>
 
         </div>
 
       </div>
 
-    </section>
+
+      <!-- BRAND + CONDITION -->
+
+      <div class="two-fields">
+
+        <div class="field">
+
+          <label>
+            Brand
+          </label>
+
+          <input
+            type="text"
+            id="listingBrand"
+            placeholder="Например: Nike"
+            maxlength="50"
+          >
+
+        </div>
+
+
+        <div class="field">
+
+          <label>
+            Condition
+          </label>
+
+          <select id="listingCondition">
+
+            <option value="New">
+              New
+            </option>
+
+            <option value="Like new">
+              Like new
+            </option>
+
+            <option value="Good">
+              Good
+            </option>
+
+            <option value="Used">
+              Used
+            </option>
+
+          </select>
+
+        </div>
+
+      </div>
+
+
+      <!-- PRICE + DURATION -->
+
+      <div class="two-fields">
+
+        <div class="field">
+
+          <label>
+            Starting price · ₴
+          </label>
+
+          <input
+            type="number"
+            id="listingStartPrice"
+            placeholder="1000"
+            min="1"
+            step="1"
+          >
+
+        </div>
+
+
+        <div class="field">
+
+          <label>
+            Minimum bid step · ₴
+          </label>
+
+          <input
+            type="number"
+            id="listingMinimumBid"
+            placeholder="100"
+            min="1"
+            step="1"
+          >
+
+        </div>
+
+      </div>
+
+
+      <!-- DURATION -->
+
+      <div class="field">
+
+        <label>
+          Auction duration
+        </label>
+
+        <select id="listingDuration">
+
+          <option value="1">
+            1 hour
+          </option>
+
+          <option value="6">
+            6 hours
+          </option>
+
+          <option value="12">
+            12 hours
+          </option>
+
+          <option value="24" selected>
+            24 hours
+          </option>
+
+          <option value="72">
+            3 days
+          </option>
+
+          <option value="168">
+            7 days
+          </option>
+
+        </select>
+
+      </div>
+
+
+      <!-- CREATE -->
+
+      <button
+        class="primary-btn"
+        onclick="createAuction()"
+      >
+        CREATE AUCTION
+      </button>
+
+
+    </div>
+
+  </div>
+
+</section>
 
 
     <!-- BIDS -->
@@ -3090,6 +3195,151 @@
     ===================================================== */
 
     checkAuth();
+
+    // ================================
+// CREATE AUCTION — IMAGE PREVIEW
+// ================================
+
+const listingImagesInput =
+  document.getElementById('listingImages');
+
+const imagePreview =
+  document.getElementById('imagePreview');
+
+
+if (listingImagesInput) {
+
+  listingImagesInput.addEventListener(
+    'change',
+    function () {
+
+      imagePreview.innerHTML = '';
+
+      const files =
+        Array.from(this.files || []);
+
+
+      if (!files.length) {
+        return;
+      }
+
+
+      const allowedTypes = [
+        'image/jpeg',
+        'image/png',
+        'image/webp'
+      ];
+
+
+      const validFiles = [];
+
+
+      files.forEach((file) => {
+
+        if (!allowedTypes.includes(file.type)) {
+
+          showToast(
+            `${file.name}: недопустимый формат`
+          );
+
+          return;
+        }
+
+
+        if (file.size > 10 * 1024 * 1024) {
+
+          showToast(
+            `${file.name}: файл больше 10 MB`
+          );
+
+          return;
+        }
+
+
+        validFiles.push(file);
+
+      });
+
+
+      if (!validFiles.length) {
+        this.value = '';
+        return;
+      }
+
+
+      // Ограничиваем количество фотографий
+      if (validFiles.length > 10) {
+
+        showToast(
+          'Можно добавить максимум 10 фотографий.'
+        );
+
+        validFiles.splice(10);
+      }
+
+
+      // Показываем превью
+      validFiles.forEach((file) => {
+
+        const reader =
+          new FileReader();
+
+
+        reader.onload = function (event) {
+
+          const wrapper =
+            document.createElement('div');
+
+
+          wrapper.style.display =
+            'inline-block';
+
+          wrapper.style.marginRight =
+            '8px';
+
+          wrapper.style.marginBottom =
+            '8px';
+
+
+          const image =
+            document.createElement('img');
+
+
+          image.src =
+            event.target.result;
+
+
+          image.style.width =
+            '90px';
+
+          image.style.height =
+            '90px';
+
+          image.style.objectFit =
+            'cover';
+
+          image.style.borderRadius =
+            '10px';
+
+          image.style.border =
+            '1px solid rgba(255,255,255,0.12)';
+
+
+          wrapper.appendChild(image);
+
+          imagePreview.appendChild(wrapper);
+
+        };
+
+
+        reader.readAsDataURL(file);
+
+      });
+
+    }
+  );
+
+}
 
   </script>
 
