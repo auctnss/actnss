@@ -5457,6 +5457,123 @@ function changeLotImage(
     });
 
 }
+
+     // ================================
+// PLACE BID
+// ================================
+
+async function placeBid(auctionId) {
+
+  const input =
+    document.getElementById('bidAmount');
+
+  if (!input) return;
+
+  const amount =
+    Number(input.value);
+
+  if (!Number.isFinite(amount) || amount <= 0) {
+    alert('Введите корректную сумму ставки.');
+    return;
+  }
+
+  try {
+
+    const {
+      data: {
+        user
+      }
+    } =
+      await supabaseClient.auth.getUser();
+
+    if (!user) {
+      alert('Сначала войдите в аккаунт.');
+      return;
+    }
+
+    const {
+      data,
+      error
+    } =
+      await supabaseClient.rpc(
+        'place_bid',
+        {
+          p_auction_id: auctionId,
+          p_amount: amount
+        }
+      );
+
+    if (error) {
+      console.error(
+        'PLACE BID ERROR:',
+        error
+      );
+
+      if (
+        error.message.includes(
+          'BID_TOO_LOW'
+        )
+      ) {
+        alert(
+          'Ставка слишком низкая.'
+        );
+        return;
+      }
+
+      if (
+        error.message.includes(
+          'SELLER_CANNOT_BID'
+        )
+      ) {
+        alert(
+          'Вы не можете делать ставки на собственный лот.'
+        );
+        return;
+      }
+
+      if (
+        error.message.includes(
+          'AUCTION_ENDED'
+        )
+      ) {
+        alert(
+          'Этот аукцион уже завершён.'
+        );
+        return;
+      }
+
+      if (
+        error.message.includes(
+          'AUCTION_NOT_ACTIVE'
+        )
+      ) {
+        alert(
+          'Этот аукцион больше не активен.'
+        );
+        return;
+      }
+
+      throw error;
+    }
+
+    alert('Ставка принята!');
+
+    await openLot(auctionId);
+
+  } catch (error) {
+
+    console.error(
+      'BID ERROR:',
+      error
+    );
+
+    alert(
+      'Не удалось сделать ставку.'
+    );
+
+  }
+
+}
     
 // ================================
 // COUNTDOWN TIMER
