@@ -5194,17 +5194,17 @@ function updateAuctionPriceRealtime(
     currentPrice + minimumBid;
 
 
-  const priceElement =
-    document.querySelector(
-      '.lot-price-card strong'
-    );
+ const priceElement =
+  document.querySelector(
+    '.lot-price-card .lot-price'
+  );
 
-  if (priceElement) {
+if (priceElement) {
 
-    priceElement.textContent =
-      `₴${formatPrice(currentPrice)}`;
+  priceElement.textContent =
+    `₴${formatPrice(currentPrice)}`;
 
-  }
+}
 
   const currentBidElement =
   document.getElementById(
