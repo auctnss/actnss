@@ -1228,238 +1228,106 @@
 
     <section id="lots" class="page">
 
-      <div class="hero">
+  <div class="hero">
 
-        <div class="eyebrow">
-          EXPLORE
-        </div>
+    <div class="eyebrow">
+      EXPLORE
+    </div>
 
-        <h1>
-          LOTS.
-        </h1>
+    <h1>
+      LOTS.
+    </h1>
 
-        <p>
-          Все активные аукционы на одной странице.
-        </p>
+    <p>
+      Все активные аукционы на одной странице.
+    </p>
 
-      </div>
+  </div>
 
 
-      <input
-        class="search-box"
-        type="text"
-        placeholder="Search lots..."
-        oninput="searchLots(this.value)"
-      >
+  <input
+    class="search-box"
+    type="text"
+    id="lotsSearch"
+    placeholder="Search lots..."
+    oninput="searchLots(this.value)"
+  >
 
 
-      <div class="filters">
+  <div class="filters">
 
-        <button class="filter active">
-          All
-        </button>
+    <button
+      class="filter active"
+      onclick="filterLots('All', this)"
+    >
+      All
+    </button>
 
-        <button class="filter">
-          Clothing
-        </button>
+    <button
+      class="filter"
+      onclick="filterLots('Clothing', this)"
+    >
+      Clothing
+    </button>
 
-        <button class="filter">
-          Sneakers
-        </button>
+    <button
+      class="filter"
+      onclick="filterLots('Sneakers', this)"
+    >
+      Sneakers
+    </button>
 
-        <button class="filter">
-          Accessories
-        </button>
+    <button
+      class="filter"
+      onclick="filterLots('Accessories', this)"
+    >
+      Accessories
+    </button>
 
-        <button class="filter">
-          Vintage
-        </button>
+    <button
+      class="filter"
+      onclick="filterLots('Vintage', this)"
+    >
+      Vintage
+    </button>
 
-      </div>
+  </div>
 
 
-      <div class="section-head">
+  <div class="section-head">
 
-        <h2>
-          Active lots
-        </h2>
+    <h2>
+      Active lots
+    </h2>
 
-        <span>
-          24 auctions
-        </span>
+    <span id="lotsCount">
+      0 auctions
+    </span>
 
-      </div>
+  </div>
 
 
-      <div class="auction-grid">
+  <!-- SUPABASE LOTS -->
 
-        <article class="auction-card">
+  <div
+    class="auction-grid"
+    id="auctionGrid"
+  >
 
-          <div class="product-image one">
+    <div
+      style="
+        grid-column: 1 / -1;
+        text-align: center;
+        padding: 50px 20px;
+        color: var(--muted);
+      "
+    >
+      Loading lots...
+    </div>
 
-            <div class="fake-product">
-              04
-            </div>
+  </div>
 
-            <div class="live-badge">
-              LIVE
-            </div>
-
-          </div>
-
-
-          <div class="auction-info">
-
-            <div class="auction-title">
-              Black Zip Hoodie
-            </div>
-
-            <div class="seller">
-              @unknown
-            </div>
-
-
-            <div class="price-row">
-
-              <div>
-
-                <div class="price-label">
-                  Current bid
-                </div>
-
-                <div class="price">
-                  ₴1,200
-                </div>
-
-              </div>
-
-
-              <button
-                class="bid-btn"
-                onclick="showToast('Открываем лот...')"
-              >
-                VIEW
-              </button>
-
-            </div>
-
-          </div>
-
-        </article>
-
-
-        <article class="auction-card">
-
-          <div class="product-image two">
-
-            <div class="fake-product">
-              05
-            </div>
-
-            <div class="live-badge">
-              LIVE
-            </div>
-
-          </div>
-
-
-          <div class="auction-info">
-
-            <div class="auction-title">
-              Vintage Denim
-            </div>
-
-            <div class="seller">
-              @archive
-            </div>
-
-
-            <div class="price-row">
-
-              <div>
-
-                <div class="price-label">
-                  Current bid
-                </div>
-
-                <div class="price">
-                  ₴900
-                </div>
-
-              </div>
-
-
-              <button
-                class="bid-btn"
-                onclick="showToast('Открываем лот...')"
-              >
-                VIEW
-              </button>
-
-            </div>
-
-          </div>
-
-        </article>
-
-
-        <article class="auction-card">
-
-          <div class="product-image three">
-
-            <div class="fake-product">
-              06
-            </div>
-
-            <div class="live-badge">
-              LIVE
-            </div>
-
-          </div>
-
-
-          <div class="auction-info">
-
-            <div class="auction-title">
-              Silver Necklace
-            </div>
-
-            <div class="seller">
-              @seller06
-            </div>
-
-
-            <div class="price-row">
-
-              <div>
-
-                <div class="price-label">
-                  Current bid
-                </div>
-
-                <div class="price">
-                  ₴1,700
-                </div>
-
-              </div>
-
-
-              <button
-                class="bid-btn"
-                onclick="showToast('Открываем лот...')"
-              >
-                VIEW
-              </button>
-
-            </div>
-
-          </div>
-
-        </article>
-
-      </div>
-
-    </section>
+</section>
 
 
     <!-- CREATE -->
