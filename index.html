@@ -4480,6 +4480,192 @@ async function openLot(auctionId) {
 
 }
 
+    // ================================
+// RENDER LOT DETAIL
+// ================================
+
+function renderLotDetail(auction) {
+
+  const container =
+    document.getElementById('lotDetailContent');
+
+  if (!container) return;
+
+  const listing = auction.listings;
+
+  const images =
+    [...(listing.listing_images || [])]
+      .sort(
+        (a, b) =>
+          (a.position || 0) -
+          (b.position || 0)
+      );
+
+  const username =
+    listing.profiles?.username ||
+    'unknown';
+
+  const rating =
+    listing.profiles?.rating ??
+    5;
+
+  const imageUrl =
+    images.length
+      ? images[0].image_url
+      : '';
+
+  const safeTitle =
+    escapeHtml(
+      listing.title || 'Untitled lot'
+    );
+
+  const safeDescription =
+    escapeHtml(
+      listing.description ||
+      'No description provided.'
+    );
+
+  const safeBrand =
+    escapeHtml(
+      listing.brand || '—'
+    );
+
+  const safeSize =
+    escapeHtml(
+      listing.size || '—'
+    );
+
+  const safeCondition =
+    escapeHtml(
+      listing.condition || '—'
+    );
+
+  const safeCategory =
+    escapeHtml(
+      listing.category || '—'
+    );
+
+  const safeUsername =
+    escapeHtml(username);
+
+  const currentPrice =
+    Number(
+      auction.current_price || 0
+    );
+
+  const minimumBid =
+    Number(
+      auction.minimum_bid || 0
+    );
+
+  container.innerHTML = `
+
+    <div class="lot-gallery">
+
+      ${
+        imageUrl
+          ? `
+            <img
+              src="${imageUrl}"
+              alt="${safeTitle}"
+              class="lot-main-image"
+            >
+          `
+          : `
+            <div class="lot-no-image">
+              ACTNSS
+            </div>
+          `
+      }
+
+    </div>
+
+
+    <div class="lot-main-info">
+
+      <div class="lot-eyebrow">
+        ${safeCategory}
+      </div>
+
+      <h1 class="lot-title">
+        ${safeTitle}
+      </h1>
+
+      <div class="lot-seller">
+        @${safeUsername}
+        <span>★ ${Number(rating).toFixed(1)}</span>
+      </div>
+
+
+      <div class="lot-price-card">
+
+        <div>
+          <div class="lot-price-label">
+            Current bid
+          </div>
+
+          <div class="lot-price">
+            ₴${formatPrice(currentPrice)}
+          </div>
+        </div>
+
+        <div class="lot-min-bid">
+          + ₴${formatPrice(minimumBid)}
+          <span>minimum step</span>
+        </div>
+
+      </div>
+
+
+      <div
+        class="lot-detail-countdown"
+        data-end="${auction.ends_at}"
+      >
+        ${formatCountdown(auction.ends_at)}
+      </div>
+
+
+      <div class="lot-description">
+
+        <h3>Description</h3>
+
+        <p>
+          ${safeDescription}
+        </p>
+
+      </div>
+
+
+      <div class="lot-specs">
+
+        <div>
+          <span>Brand</span>
+          <strong>${safeBrand}</strong>
+        </div>
+
+        <div>
+          <span>Size</span>
+          <strong>${safeSize}</strong>
+        </div>
+
+        <div>
+          <span>Condition</span>
+          <strong>${safeCondition}</strong>
+        </div>
+
+        <div>
+          <span>Category</span>
+          <strong>${safeCategory}</strong>
+        </div>
+
+      </div>
+
+    </div>
+
+  `;
+
+}
+
 // ================================
 // COUNTDOWN TIMER
 // ================================
