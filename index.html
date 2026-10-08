@@ -4781,9 +4781,12 @@ function renderLots() {
                   Current bid
                 </div>
 
-                <div class="price">
-                  ₴${formatPrice(currentPrice)}
-                </div>
+                <div
+  class="price"
+  id="currentBidPrice"
+>
+  ₴${formatPrice(currentPrice)}
+</div>
 
               </div>
 
@@ -5204,8 +5207,8 @@ function updateAuctionPriceRealtime(
   }
 
   const currentBidElement =
-  document.querySelector(
-    '.lot-price-card .price'
+  document.getElementById(
+    'currentBidPrice'
   );
 
 if (currentBidElement) {
