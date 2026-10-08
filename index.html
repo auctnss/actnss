@@ -5204,7 +5204,8 @@ async function openLot(auctionId) {
       throw new Error('Lot not found');
     }
 
-    renderLotDetail(data);
+renderLotDetail(data);
+await loadBidHistory(auctionId);
 startAuctionRealtime(auctionId);
 
   } catch (error) {
@@ -5223,6 +5224,132 @@ startAuctionRealtime(auctionId);
         "
       >
         Не удалось загрузить лот.
+      </div>
+    `;
+
+  }
+
+}
+
+    // ================================
+// LOAD BID HISTORY
+// ================================
+
+async function loadBidHistory(auctionId) {
+
+  const list =
+    document.getElementById(
+      'bidHistoryList'
+    );
+
+  const count =
+    document.getElementById(
+      'bidHistoryCount'
+    );
+
+  if (!list || !count) return;
+
+  try {
+
+    const {
+      data,
+      error
+    } =
+      await supabaseClient
+        .from('bids')
+        .select(`
+          id,
+          amount,
+          created_at,
+          bidder_id,
+          profiles (
+            username
+          )
+        `)
+        .eq(
+          'auction_id',
+          auctionId
+        )
+        .order(
+          'amount',
+          {
+            ascending: false
+          }
+        );
+
+    if (error) throw error;
+
+    const bids =
+      data || [];
+
+    count.textContent =
+      `${bids.length} ${
+        bids.length === 1
+          ? 'bid'
+          : 'bids'
+      }`;
+
+    if (!bids.length) {
+
+      list.innerHTML = `
+        <div class="lot-bid-history-empty">
+          No bids yet.
+        </div>
+      `;
+
+      return;
+
+    }
+
+    list.innerHTML =
+      bids.map((bid) => {
+
+        const username =
+          bid.profiles?.username ||
+          'Anonymous';
+
+        const amount =
+          Number(bid.amount);
+
+        const date =
+          new Date(
+            bid.created_at
+          );
+
+        return `
+          <div class="lot-bid-item">
+
+            <div class="lot-bid-user">
+
+              <div class="lot-bid-username">
+                @${username}
+              </div>
+
+              <div class="lot-bid-time">
+                ${date.toLocaleString()}
+              </div>
+
+            </div>
+
+            <div class="lot-bid-amount">
+              ₴${formatPrice(amount)}
+            </div>
+
+          </div>
+        `;
+
+      }).join('');
+
+  } catch (error) {
+
+    console.error(
+      'LOAD BID HISTORY ERROR:',
+      error
+    );
+
+    list.innerHTML = `
+      <div class="lot-bid-history-empty">
+        Failed to load bid history.
       </div>
     `;
 
