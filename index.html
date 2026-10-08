@@ -5109,6 +5109,7 @@ async function openLot(auctionId) {
     }
 
     renderLotDetail(data);
+startAuctionRealtime(auctionId);
 
   } catch (error) {
 
@@ -5132,6 +5133,126 @@ async function openLot(auctionId) {
   }
 
 }
+
+    // ================================
+// AUCTION REALTIME
+// ================================
+
+let auctionRealtimeChannel = null;
+
+function startAuctionRealtime(auctionId) {
+
+  if (auctionRealtimeChannel) {
+    supabaseClient.removeChannel(
+      auctionRealtimeChannel
+    );
+  }
+
+  auctionRealtimeChannel =
+    supabaseClient
+      .channel(`auction-${auctionId}`)
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'auctions',
+          filter: `id=eq.${auctionId}`
+        },
+        (payload) => {
+
+          console.log(
+            'AUCTION UPDATED:',
+            payload.new
+          );
+
+          updateAuctionPriceRealtime(
+            payload.new
+          );
+
+        }
+      )
+      .subscribe();
+
+}
+
+
+function updateAuctionPriceRealtime(
+  auction
+) {
+
+  const currentPrice =
+    Number(auction.current_price);
+
+  const minimumBid =
+    Number(auction.minimum_bid);
+
+  const nextBid =
+    currentPrice + minimumBid;
+
+
+  const priceElement =
+    document.querySelector(
+      '.lot-price-card strong'
+    );
+
+  if (priceElement) {
+
+    priceElement.textContent =
+      `₴${formatPrice(currentPrice)}`;
+
+  }
+
+
+  const bidInput =
+    document.getElementById(
+      'bidAmount'
+    );
+
+  if (bidInput) {
+
+    bidInput.min =
+      nextBid;
+
+    bidInput.step =
+      minimumBid;
+
+    bidInput.value =
+      nextBid;
+
+    bidInput.placeholder =
+      nextBid;
+
+  }
+
+
+  const bidHeader =
+    document.querySelector(
+      '.lot-bid-header strong'
+    );
+
+  if (bidHeader) {
+
+    bidHeader.textContent =
+      `₴${formatPrice(nextBid)}`;
+
+  }
+
+
+  const minimumText =
+    document.querySelector(
+      '.lot-bid-minimum'
+    );
+
+  if (minimumText) {
+
+    minimumText.textContent =
+      `Minimum bid: ₴${formatPrice(nextBid)}`;
+
+  }
+
+}
+
 
     // ================================
 // RENDER LOT DETAIL
