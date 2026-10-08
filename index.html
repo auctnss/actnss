@@ -3412,6 +3412,468 @@ function renderImagePreview() {
 
 }
 
+    // ================================
+// CREATE AUCTION
+// ================================
+
+async function createAuction() {
+
+  // ----------------
+  // CHECK AUTH
+  // ----------------
+
+  const {
+    data: {
+      session
+    }
+  } = await supabaseClient.auth.getSession();
+
+
+  if (!session) {
+
+    showToast(
+      'Сначала войдите в аккаунт.'
+    );
+
+    openAuth();
+
+    return;
+  }
+
+
+  // ----------------
+  // GET FORM DATA
+  // ----------------
+
+  const title =
+    document
+      .getElementById('listingTitle')
+      .value
+      .trim();
+
+
+  const description =
+    document
+      .getElementById('listingDescription')
+      .value
+      .trim();
+
+
+  const category =
+    document
+      .getElementById('listingCategory')
+      .value;
+
+
+  const size =
+    document
+      .getElementById('listingSize')
+      .value
+      .trim();
+
+
+  const brand =
+    document
+      .getElementById('listingBrand')
+      .value
+      .trim();
+
+
+  const condition =
+    document
+      .getElementById('listingCondition')
+      .value;
+
+
+  const startPrice =
+    Number(
+      document
+        .getElementById('listingStartPrice')
+        .value
+    );
+
+
+  const minimumBid =
+    Number(
+      document
+        .getElementById('listingMinimumBid')
+        .value
+    );
+
+
+  const durationHours =
+    Number(
+      document
+        .getElementById('listingDuration')
+        .value
+    );
+
+
+  // ----------------
+  // VALIDATION
+  // ----------------
+
+  if (!title) {
+
+    showToast(
+      'Введите название лота.'
+    );
+
+    return;
+  }
+
+
+  if (title.length < 3) {
+
+    showToast(
+      'Название должно содержать минимум 3 символа.'
+    );
+
+    return;
+  }
+
+
+  if (!selectedListingImages.length) {
+
+    showToast(
+      'Добавьте хотя бы одну фотографию.'
+    );
+
+    return;
+  }
+
+
+  if (!Number.isFinite(startPrice) || startPrice <= 0) {
+
+    showToast(
+      'Введите корректную стартовую цену.'
+    );
+
+    return;
+  }
+
+
+  if (!Number.isFinite(minimumBid) || minimumBid <= 0) {
+
+    showToast(
+      'Введите корректный минимальный шаг ставки.'
+    );
+
+    return;
+  }
+
+
+  if (!Number.isFinite(durationHours) || durationHours <= 0) {
+
+    showToast(
+      'Выберите длительность аукциона.'
+    );
+
+    return;
+  }
+
+
+  // ----------------
+  // DISABLE BUTTON
+  // ----------------
+
+  const button =
+    document.querySelector(
+      '#create .primary-btn'
+    );
+
+
+  const originalText =
+    button
+      ? button.textContent
+      : 'CREATE AUCTION';
+
+
+  if (button) {
+
+    button.disabled = true;
+
+    button.textContent =
+      'CREATING...';
+
+  }
+
+
+  let listingId = null;
+
+
+  try {
+
+    // ----------------
+    // 1. CREATE LISTING
+    // ----------------
+
+    const {
+      data: listing,
+      error: listingError
+    } = await supabaseClient
+      .from('listings')
+      .insert({
+        seller_id: session.user.id,
+        title: title,
+        description: description || null,
+        category: category || null,
+        brand: brand || null,
+        size: size || null,
+        condition: condition || null
+      })
+      .select('id')
+      .single();
+
+
+    if (listingError) {
+
+      throw listingError;
+
+    }
+
+
+    listingId =
+      listing.id;
+
+
+    // ----------------
+    // 2. UPLOAD IMAGES
+    // ----------------
+
+    for (
+      let i = 0;
+      i < selectedListingImages.length;
+      i++
+    ) {
+
+      const file =
+        selectedListingImages[i];
+
+
+      const extension =
+        file.name
+          .split('.')
+          .pop()
+          .toLowerCase();
+
+
+      const fileName =
+        `${Date.now()}-${i}.${extension}`;
+
+
+      const filePath =
+        `${session.user.id}/${listingId}/${fileName}`;
+
+
+      const {
+        error: uploadError
+      } = await supabaseClient
+        .storage
+        .from('listing-images')
+        .upload(
+          filePath,
+          file,
+          {
+            cacheControl: '3600',
+            upsert: false,
+            contentType: file.type
+          }
+        );
+
+
+      if (uploadError) {
+
+        throw uploadError;
+
+      }
+
+
+      // ----------------
+      // 3. GET PUBLIC URL
+      // ----------------
+
+      const {
+        data: publicUrlData
+      } =
+        supabaseClient
+          .storage
+          .from('listing-images')
+          .getPublicUrl(
+            filePath
+          );
+
+
+      const imageUrl =
+        publicUrlData.publicUrl;
+
+
+      // ----------------
+      // 4. SAVE IMAGE
+      // ----------------
+
+      const {
+        error: imageError
+      } = await supabaseClient
+        .from('listing_images')
+        .insert({
+          listing_id: listingId,
+          image_url: imageUrl,
+          position: i
+        });
+
+
+      if (imageError) {
+
+        throw imageError;
+
+      }
+
+    }
+
+
+    // ----------------
+    // 5. CREATE AUCTION
+    // ----------------
+
+    const startsAt =
+      new Date();
+
+
+    const endsAt =
+      new Date(
+        startsAt.getTime() +
+        durationHours * 60 * 60 * 1000
+      );
+
+
+    const {
+      error: auctionError
+    } = await supabaseClient
+      .from('auctions')
+      .insert({
+        listing_id: listingId,
+        start_price: startPrice,
+        current_price: startPrice,
+        minimum_bid: minimumBid,
+        starts_at: startsAt.toISOString(),
+        ends_at: endsAt.toISOString(),
+        status: 'active'
+      });
+
+
+    if (auctionError) {
+
+      throw auctionError;
+
+    }
+
+
+    // ----------------
+    // SUCCESS
+    // ----------------
+
+    showToast(
+      'Аукцион успешно создан!'
+    );
+
+
+    // Очищаем форму
+
+    document
+      .getElementById('listingTitle')
+      .value = '';
+
+
+    document
+      .getElementById('listingDescription')
+      .value = '';
+
+
+    document
+      .getElementById('listingSize')
+      .value = '';
+
+
+    document
+      .getElementById('listingBrand')
+      .value = '';
+
+
+    document
+      .getElementById('listingStartPrice')
+      .value = '';
+
+
+    document
+      .getElementById('listingMinimumBid')
+      .value = '';
+
+
+    selectedListingImages = [];
+
+
+    renderImagePreview();
+
+
+    // Переходим на Lots
+
+    if (
+      typeof showPage === 'function'
+    ) {
+
+      showPage('lots');
+
+    }
+
+
+  } catch (error) {
+
+    console.error(
+      'CREATE AUCTION ERROR:',
+      error
+    );
+
+
+    showToast(
+      error.message ||
+      'Не удалось создать аукцион.'
+    );
+
+
+    // Если listing уже был создан,
+    // удаляем его.
+    // Благодаря ON DELETE CASCADE
+    // связанные записи тоже удалятся.
+
+    if (listingId) {
+
+      await supabaseClient
+        .from('listings')
+        .delete()
+        .eq(
+          'id',
+          listingId
+        );
+
+    }
+
+
+  } finally {
+
+    if (button) {
+
+      button.disabled = false;
+
+      button.textContent =
+        originalText;
+
+    }
+
+  }
+
+}
+
   </script>
 
 </body>
