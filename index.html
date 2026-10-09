@@ -5378,6 +5378,8 @@ function startAuctionRealtime(auctionId) {
   auctionRealtimeChannel =
     supabaseClient
       .channel(`auction-${auctionId}`)
+
+      // Обновление цены
       .on(
         'postgres_changes',
         {
@@ -5399,7 +5401,36 @@ function startAuctionRealtime(auctionId) {
 
         }
       )
-      .subscribe();
+
+      // Новая ставка
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'bids',
+          filter: `auction_id=eq.${auctionId}`
+        },
+        (payload) => {
+
+          console.log(
+            'NEW BID:',
+            payload.new
+          );
+
+          loadBidHistory(auctionId);
+
+        }
+      )
+
+      .subscribe((status) => {
+
+        console.log(
+          'AUCTION REALTIME STATUS:',
+          status
+        );
+
+      });
 
 }
 
