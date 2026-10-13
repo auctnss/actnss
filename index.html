@@ -1489,14 +1489,24 @@
   align-items: center;
   justify-content: center;
   padding: 0;
-  line-height: 1;
-  text-align: center;
   border: 1px solid rgba(255,255,255,0.12);
   border-radius: 9px;
   color: #fff;
-  font-size: 20px;
-  font-family: Arial, sans-serif;
-  transition: transform 0.2s ease, background 0.2s ease;
+  transition: background 0.2s ease;
+}
+
+.lot-bid-history-arrow::before {
+  content: "";
+  width: 7px;
+  height: 7px;
+  border-right: 1.5px solid currentColor;
+  border-bottom: 1.5px solid currentColor;
+  transform: translateY(-2px) rotate(45deg);
+  transition: transform 0.2s ease;
+}
+
+.lot-bid-history-toggle[aria-expanded="true"] .lot-bid-history-arrow::before {
+  transform: translateY(2px) rotate(225deg);
 }
 
 .lot-bid-history-toggle:hover .lot-bid-history-arrow {
@@ -5312,9 +5322,6 @@ startAuctionRealtime(auctionId);
     String(!isExpanded)
   );
 
-  arrow.textContent =
-  isExpanded ? '⌄' : '⌃';
-
 }
 
     // ================================
@@ -5862,11 +5869,10 @@ function renderLotDetail(auction) {
     </span>
 
     <span
-      class="lot-bid-history-arrow"
-      id="bidHistoryArrow"
-    >
-      ⌄
-    </span>
+  class="lot-bid-history-arrow"
+  id="bidHistoryArrow"
+  aria-hidden="true"
+></span>
 
   </button>
 
