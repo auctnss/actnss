@@ -1461,6 +1461,52 @@
   margin-bottom: 14px;
 }
 
+    .lot-bid-history-toggle {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.lot-bid-history-toggle .lot-bid-history-header {
+  flex: 1;
+  margin-bottom: 0;
+}
+
+.lot-bid-history-arrow {
+  width: 30px;
+  height: 30px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 9px;
+  color: #fff;
+  font-size: 20px;
+  transition: transform 0.2s ease, background 0.2s ease;
+}
+
+.lot-bid-history-toggle:hover .lot-bid-history-arrow {
+  background: rgba(255,255,255,0.07);
+}
+
+.lot-bid-history-list[hidden] {
+  display: none;
+}
+
+.lot-bid-history-list:not([hidden]) {
+  margin-top: 14px;
+}
+
 .lot-bid-history-header span:first-child {
   color: #fff;
 
@@ -5231,6 +5277,42 @@ startAuctionRealtime(auctionId);
 
 }
 
+    function toggleBidHistory() {
+
+  const list =
+    document.getElementById(
+      'bidHistoryList'
+    );
+
+  const button =
+    document.getElementById(
+      'bidHistoryToggle'
+    );
+
+  const arrow =
+    document.getElementById(
+      'bidHistoryArrow'
+    );
+
+  if (!list || !button || !arrow) {
+    return;
+  }
+
+  const isExpanded =
+    button.getAttribute('aria-expanded') === 'true';
+
+  list.hidden = isExpanded;
+
+  button.setAttribute(
+    'aria-expanded',
+    String(!isExpanded)
+  );
+
+  arrow.textContent =
+    isExpanded ? '+' : '−';
+
+}
+
     // ================================
 // LOAD BID HISTORY
 // ================================
@@ -5762,14 +5844,32 @@ function renderLotDetail(auction) {
 
 <div class="lot-bid-history">
 
-  <div class="lot-bid-history-header">
-    <span>Bid history</span>
-    <span id="bidHistoryCount">0 bids</span>
-  </div>
+  <button
+    type="button"
+    class="lot-bid-history-toggle"
+    onclick="toggleBidHistory()"
+    aria-expanded="false"
+    id="bidHistoryToggle"
+  >
+
+    <span class="lot-bid-history-header">
+      <span>Bid history</span>
+      <span id="bidHistoryCount">0 bids</span>
+    </span>
+
+    <span
+      class="lot-bid-history-arrow"
+      id="bidHistoryArrow"
+    >
+      +
+    </span>
+
+  </button>
 
   <div
     id="bidHistoryList"
     class="lot-bid-history-list"
+    hidden
   >
 
     <div class="lot-bid-history-empty">
