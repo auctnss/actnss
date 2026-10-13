@@ -1,1 +1,766 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#09090a">
+  <title>ACTNSS — Messages</title>
 
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #09090a;
+      --panel: #101012;
+      --border: rgba(255,255,255,.09);
+      --muted: #85858e;
+      --red: #e53945;
+      --text: #f5f5f6;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--text);
+      background:
+        radial-gradient(ellipse at 0 45%, rgba(120,0,0,.23), transparent 35%),
+        radial-gradient(ellipse at 100% 65%, rgba(80,0,0,.13), transparent 32%),
+        var(--bg);
+      font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    button, input { font: inherit; }
+    button { cursor: pointer; }
+
+    .topbar {
+      height: 70px;
+      padding: 0 5%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--border);
+      background: rgba(9,9,10,.82);
+    }
+
+    .logo {
+      color: white;
+      font-size: 21px;
+      font-weight: 900;
+      letter-spacing: .16em;
+      text-decoration: none;
+    }
+
+    .back {
+      color: #b8b8c0;
+      text-decoration: none;
+      font-size: 13px;
+    }
+
+    .page {
+      width: min(1100px, 92%);
+      margin: 35px auto;
+    }
+
+    .heading { margin-bottom: 22px; }
+
+    .heading h1 {
+      margin: 0 0 8px;
+      font-size: clamp(26px, 4vw, 34px);
+      letter-spacing: -.04em;
+    }
+
+    .heading p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .layout {
+      min-height: 570px;
+      display: grid;
+      grid-template-columns: 310px minmax(0,1fr);
+      overflow: hidden;
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      background: rgba(13,13,15,.94);
+    }
+
+    .sidebar {
+      min-width: 0;
+      border-right: 1px solid var(--border);
+    }
+
+    .sidebar-head {
+      padding: 20px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .sidebar-head h2 {
+      margin: 0 0 14px;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: .1em;
+    }
+
+    .search, .message-input {
+      width: 100%;
+      min-width: 0;
+      padding: 12px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: #09090a;
+      color: white;
+      outline: none;
+      font-size: 12px;
+    }
+
+    .search:focus, .message-input:focus {
+      border-color: rgba(229,57,69,.65);
+    }
+
+    .chat-list { padding: 10px; }
+
+    .chat-item {
+      width: 100%;
+      display: block;
+      padding: 14px;
+      margin-bottom: 5px;
+      border: 1px solid transparent;
+      border-radius: 12px;
+      background: transparent;
+      color: white;
+      text-align: left;
+    }
+
+    .chat-item:hover { background: rgba(255,255,255,.035); }
+
+    .chat-item.active {
+      background: rgba(229,57,69,.08);
+      border-color: rgba(229,57,69,.24);
+    }
+
+    .chat-name {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .chat-preview {
+      display: block;
+      overflow: hidden;
+      color: var(--muted);
+      font-size: 11px;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .conversation {
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .conversation-head {
+      min-height: 70px;
+      padding: 16px 22px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .conversation-title {
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .conversation-subtitle {
+      margin-top: 5px;
+      color: var(--muted);
+      font-size: 11px;
+    }
+
+    .messages {
+      flex: 1;
+      min-height: 350px;
+      max-height: 540px;
+      overflow-y: auto;
+      padding: 22px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .message {
+      max-width: min(78%, 440px);
+      align-self: flex-start;
+      padding: 11px 13px;
+      border: 1px solid var(--border);
+      border-radius: 13px 13px 13px 4px;
+      background: #171719;
+      overflow-wrap: anywhere;
+    }
+
+    .message.mine {
+      align-self: flex-end;
+      border-color: rgba(229,57,69,.25);
+      border-radius: 13px 13px 4px 13px;
+      background: rgba(229,57,69,.12);
+    }
+
+    .message-author {
+      margin-bottom: 5px;
+      color: #f18a91;
+      font-size: 10px;
+      font-weight: 700;
+    }
+
+    .message-body {
+      color: #eee;
+      font-size: 13px;
+      line-height: 1.55;
+      white-space: pre-wrap;
+    }
+
+    .message-time {
+      margin-top: 7px;
+      color: var(--muted);
+      font-size: 10px;
+      text-align: right;
+    }
+
+    .composer {
+      display: flex;
+      gap: 10px;
+      padding: 15px;
+      border-top: 1px solid var(--border);
+    }
+
+    .send {
+      flex-shrink: 0;
+      padding: 0 18px;
+      border: 0;
+      border-radius: 10px;
+      background: var(--red);
+      color: white;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .send:disabled {
+      opacity: .45;
+      cursor: not-allowed;
+    }
+
+    .state {
+      margin: auto;
+      padding: 35px 20px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.8;
+      text-align: center;
+    }
+
+    .state strong {
+      display: block;
+      margin-bottom: 8px;
+      color: #eee;
+      font-size: 14px;
+    }
+
+    .state a {
+      color: #f18a91;
+    }
+
+    .status {
+      min-height: 18px;
+      padding: 0 16px 10px;
+      color: var(--muted);
+      font-size: 11px;
+    }
+
+    .notice {
+      margin-top: 15px;
+      color: var(--muted);
+      font-size: 10px;
+      text-align: center;
+    }
+
+    @media (max-width: 700px) {
+      .topbar { height: 62px; }
+      .page { margin: 24px auto; }
+      .layout {
+        grid-template-columns: 1fr;
+        min-height: 0;
+      }
+      .sidebar {
+        border-right: 0;
+        border-bottom: 1px solid var(--border);
+      }
+      .chat-list {
+        max-height: 220px;
+        overflow-y: auto;
+      }
+      .conversation { min-height: 440px; }
+      .messages { min-height: 300px; padding: 15px; }
+      .conversation-head { padding: 15px; }
+      .message { max-width: 88%; }
+      .composer { padding: 10px; }
+      .send { padding: 0 13px; }
+    }
+  </style>
+</head>
+
+<body>
+  <header class="topbar">
+    <a class="logo" href="../index.html">ACTNSS</a>
+    <a class="back" href="../index.html">← До аукціонів</a>
+  </header>
+
+  <main class="page">
+    <div class="heading">
+      <h1>Повідомлення</h1>
+      <p>Особисті розмови учасників аукціонів.</p>
+    </div>
+
+    <section class="layout">
+      <aside class="sidebar">
+        <div class="sidebar-head">
+          <h2>Ваші чати</h2>
+          <input id="search" class="search" type="search"
+            placeholder="Пошук розмов...">
+        </div>
+        <div id="chatList" class="chat-list">
+          <div class="state">Завантаження чатів...</div>
+        </div>
+      </aside>
+
+      <section class="conversation">
+        <div class="conversation-head">
+          <div>
+            <div id="conversationTitle" class="conversation-title">
+              Переписка
+            </div>
+            <div id="conversationSubtitle" class="conversation-subtitle">
+              Оберіть чат зі списку
+            </div>
+          </div>
+        </div>
+
+        <div id="messages" class="messages">
+          <div class="state">
+            <strong>ACTNSS MESSAGING</strong>
+            Оберіть розмову, щоб переглянути повідомлення.
+          </div>
+        </div>
+
+        <div id="status" class="status" role="status"></div>
+
+        <form id="composer" class="composer">
+          <input id="messageInput" class="message-input"
+            type="text" maxlength="5000"
+            placeholder="Напишіть повідомлення..." disabled>
+          <button id="sendButton" class="send" type="submit" disabled>
+            Надіслати
+          </button>
+        </form>
+      </section>
+    </section>
+
+    <p class="notice">ACTNSS · Особисті повідомлення</p>
+  </main>
+
+  <script>
+    const SUPABASE_URL =
+      'https://gjnkwjdczjtlknxtkyii.supabase.co';
+
+    const SUPABASE_KEY =
+      'sb_publishable_uGRNc-jMlRG_xWOESqozSQ_awpDVbkL';
+
+    const supabaseClient = window.supabase.createClient(
+      SUPABASE_URL,
+      SUPABASE_KEY
+    );
+
+    const chatListEl = document.getElementById('chatList');
+    const messagesEl = document.getElementById('messages');
+    const titleEl = document.getElementById('conversationTitle');
+    const subtitleEl = document.getElementById('conversationSubtitle');
+    const inputEl = document.getElementById('messageInput');
+    const sendButton = document.getElementById('sendButton');
+    const statusEl = document.getElementById('status');
+
+    let currentUser = null;
+    let currentChat = null;
+    let chats = [];
+    let realtimeChannel = null;
+    let sending = false;
+
+    function setStatus(text) {
+      statusEl.textContent = text || '';
+    }
+
+    function showState(container, title, description) {
+      container.replaceChildren();
+
+      const state = document.createElement('div');
+      state.className = 'state';
+
+      const strong = document.createElement('strong');
+      strong.textContent = title;
+      state.appendChild(strong);
+
+      const detail = document.createElement('div');
+      detail.textContent = description;
+      state.appendChild(detail);
+
+      container.appendChild(state);
+    }
+
+    function addLink(container, href, label) {
+      const link = document.createElement('a');
+      link.href = href;
+      link.textContent = label;
+      container.appendChild(link);
+    }
+
+    function getOtherUser(chat) {
+      return chat.buyer_id === currentUser.id
+        ? chat.seller_id
+        : chat.buyer_id;
+    }
+
+    async function loadChats() {
+      const { data, error } = await supabaseClient
+        .from('chats')
+        .select('id, auction_id, buyer_id, seller_id, created_at')
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+
+      const result = data || [];
+
+      if (!result.length) {
+        chats = [];
+        renderChats();
+        showState(
+          messagesEl,
+          'Поки немає переписок',
+          'Чат з’явиться тут, коли буде створений для завершеного аукціону.'
+        );
+        return;
+      }
+
+      const auctionIds = [...new Set(result.map(c => c.auction_id))];
+      const userIds = [...new Set(
+        result.flatMap(c => [c.buyer_id, c.seller_id])
+      )];
+
+      const [auctionResult, profileResult] = await Promise.all([
+        supabaseClient
+          .from('auctions')
+          .select('id, listing_id, current_price')
+          .in('id', auctionIds),
+
+        supabaseClient
+          .from('profiles')
+          .select('id, username')
+          .in('id', userIds)
+      ]);
+
+      if (auctionResult.error) throw auctionResult.error;
+      if (profileResult.error) throw profileResult.error;
+
+      const auctionsById = Object.fromEntries(
+        (auctionResult.data || []).map(a => [a.id, a])
+      );
+
+      const profilesById = Object.fromEntries(
+        (profileResult.data || []).map(p => [p.id, p])
+      );
+
+      const listingIds = [...new Set(
+        (auctionResult.data || []).map(a => a.listing_id).filter(Boolean)
+      )];
+
+      let listingsById = {};
+
+      if (listingIds.length) {
+        const listingResult = await supabaseClient
+          .from('listings')
+          .select('id, title')
+          .in('id', listingIds);
+
+        if (listingResult.error) throw listingResult.error;
+
+        listingsById = Object.fromEntries(
+          (listingResult.data || []).map(l => [l.id, l])
+        );
+      }
+
+      chats = result.map(chat => {
+        const auction = auctionsById[chat.auction_id];
+        const listing = auction && listingsById[auction.listing_id];
+        const otherId = getOtherUser(chat);
+        const profile = profilesById[otherId];
+
+        return {
+          ...chat,
+          auction,
+          listing,
+          otherName: profile?.username || 'Учасник ACTNSS'
+        };
+      });
+
+      renderChats();
+    }
+
+    async function renderChats() {
+      chatListEl.replaceChildren();
+
+      const query = document.getElementById('search')
+        .value.trim().toLowerCase();
+
+      const visible = chats.filter(chat =>
+        `${chat.otherName} ${chat.listing?.title || ''}`
+          .toLowerCase().includes(query)
+      );
+
+      if (!visible.length) {
+        showState(
+          chatListEl,
+          chats.length ? 'Нічого не знайдено' : 'Поки немає чатів',
+          chats.length
+            ? 'Спробуйте інший пошуковий запит.'
+            : 'Тут відображатимуться ваші переписки.'
+        );
+        return;
+      }
+
+      visible.forEach(chat => {
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'chat-item' +
+          (currentChat?.id === chat.id ? ' active' : '');
+
+        const name = document.createElement('span');
+        name.className = 'chat-name';
+        name.textContent = chat.otherName;
+
+        const preview = document.createElement('span');
+        preview.className = 'chat-preview';
+        preview.textContent = chat.listing?.title || 'Аукціон';
+
+        button.append(name, preview);
+        button.addEventListener('click', () => openChat(chat));
+        chatListEl.appendChild(button);
+      });
+    }
+
+    async function openChat(chat) {
+      currentChat = chat;
+      renderChats();
+
+      titleEl.textContent = chat.otherName;
+      subtitleEl.textContent =
+        chat.listing?.title || 'Аукціон ACTNSS';
+
+      inputEl.disabled = false;
+      sendButton.disabled = false;
+      setStatus('');
+
+      showState(messagesEl, 'Завантаження', 'Отримуємо повідомлення...');
+
+      if (realtimeChannel) {
+        await supabaseClient.removeChannel(realtimeChannel);
+        realtimeChannel = null;
+      }
+
+      try {
+        await loadMessages(chat.id);
+
+        realtimeChannel = supabaseClient
+          .channel(`messages-${chat.id}`)
+          .on('postgres_changes', {
+            event: 'INSERT',
+            schema: 'public',
+            table: 'messages',
+            filter: `chat_id=eq.${chat.id}`
+          }, payload => {
+            if (currentChat?.id === chat.id) {
+              appendMessage(payload.new);
+            }
+          })
+          .subscribe();
+
+      } catch (error) {
+        console.error('OPEN CHAT ERROR:', error);
+        showState(
+          messagesEl,
+          'Не вдалося завантажити повідомлення',
+          error.message || 'Перевірте підключення та політики доступу.'
+        );
+      }
+    }
+
+    async function loadMessages(chatId) {
+      const { data, error } = await supabaseClient
+        .from('messages')
+        .select('id, chat_id, sender_id, body, created_at')
+        .eq('chat_id', chatId)
+        .order('created_at', { ascending: true });
+
+      if (error) throw error;
+
+      messagesEl.replaceChildren();
+
+      if (!data?.length) {
+        showState(
+          messagesEl,
+          'Почніть розмову',
+          'Напишіть перше повідомлення нижче.'
+        );
+        return;
+      }
+
+      const senderIds = [...new Set(data.map(m => m.sender_id))];
+
+      const { data: profiles, error: profilesError } =
+        await supabaseClient
+          .from('profiles')
+          .select('id, username')
+          .in('id', senderIds);
+
+      if (profilesError) throw profilesError;
+
+      const names = Object.fromEntries(
+        (profiles || []).map(p => [p.id, p.username || 'Учасник'])
+      );
+
+      data.forEach(message => appendMessage(message, names));
+      messagesEl.scrollTop = messagesEl.scrollHeight;
+    }
+
+    function appendMessage(message, names = {}) {
+      if (!currentChat || message.chat_id !== currentChat.id) return;
+
+      if (messagesEl.querySelector(`[data-message-id="${message.id}"]`)) {
+        return;
+      }
+
+      const emptyState = messagesEl.querySelector('.state');
+      if (emptyState) messagesEl.replaceChildren();
+
+      const item = document.createElement('article');
+      item.className = 'message' +
+        (message.sender_id === currentUser.id ? ' mine' : '');
+      item.dataset.messageId = message.id;
+
+      const author = document.createElement('div');
+      author.className = 'message-author';
+      author.textContent = message.sender_id === currentUser.id
+        ? 'Ви'
+        : (names[message.sender_id] || 'Учасник');
+
+      const body = document.createElement('div');
+      body.className = 'message-body';
+      body.textContent = message.body;
+
+      const time = document.createElement('div');
+      time.className = 'message-time';
+      time.textContent = new Date(message.created_at).toLocaleString(
+        'uk-UA',
+        { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }
+      );
+
+      item.append(author, body, time);
+      messagesEl.appendChild(item);
+      messagesEl.scrollTop = messagesEl.scrollHeight;
+    }
+
+    document.getElementById('composer').addEventListener(
+      'submit',
+      async event => {
+        event.preventDefault();
+
+        if (!currentUser || !currentChat || sending) return;
+
+        const body = inputEl.value.trim();
+        if (!body) return;
+
+        sending = true;
+        sendButton.disabled = true;
+        setStatus('Надсилаємо...');
+
+        try {
+          const { error } = await supabaseClient
+            .from('messages')
+            .insert({
+              chat_id: currentChat.id,
+              sender_id: currentUser.id,
+              body
+            });
+
+          if (error) throw error;
+
+          inputEl.value = '';
+          setStatus('');
+        } catch (error) {
+          console.error('SEND MESSAGE ERROR:', error);
+          setStatus('Не вдалося надіслати: ' + error.message);
+        } finally {
+          sending = false;
+          sendButton.disabled = !currentChat;
+        }
+      }
+    );
+
+    document.getElementById('search').addEventListener(
+      'input',
+      renderChats
+    );
+
+    async function init() {
+      try {
+        const { data, error } = await supabaseClient.auth.getUser();
+
+        if (error) throw error;
+
+        if (!data.user) {
+          showState(
+            chatListEl,
+            'Потрібен вхід',
+            'Увійдіть у свій акаунт ACTNSS, щоб переглянути переписки.'
+          );
+          addLink(chatListEl, '../index.html', 'Перейти до ACTNSS');
+          showState(
+            messagesEl,
+            'Ви не авторизовані',
+            'Після входу відкрийте сторінку повідомлень знову.'
+          );
+          return;
+        }
+
+        currentUser = data.user;
+
+        await loadChats();
+
+      } catch (error) {
+        console.error('CHAT INIT ERROR:', error);
+        showState(
+          chatListEl,
+          'Помилка підключення',
+          error.message || 'Не вдалося підключитися до Supabase.'
+        );
+      }
+    }
+
+    init();
+  </script>
+</body>
+</html>
